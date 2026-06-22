@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacific Fajas - Generador de Facturas y Tickets</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #C5A861; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0B3A28; }
+
+        .table-row-dashed { border-bottom: 1px dashed #C5A861; }
+
+        body { font-family: 'Montserrat', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-script { font-family: 'Dancing Script', cursive; }
+
+        .tab-btn { transition: all 0.2s ease; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .ticket-dash {
+            background-image: repeating-linear-gradient(90deg, #C5A861 0 10px, transparent 10px 20px);
+            height: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+    <!-- BARRA DE PESTAÑAS -->
+    <div class="w-full bg-[#0B3A28] sticky top-0 z-50 shadow-md">
+        <div class="max-w-[1600px] mx-auto flex">
+            <button id="tabBtnFactura" onclick="switchTab('factura')" class="tab-btn flex-1 md:flex-none px-6 md:px-10 py-4 text-white font-bold font-serif tracking-wide text-sm md:text-base border-b-4 border-[#C5A861] bg-white/5">
+                FACTURA
+            </button>
+            <button id="tabBtnTicket" onclick="switchTab('ticket')" class="tab-btn flex-1 md:flex-none px-6 md:px-10 py-4 text-white/70 font-bold font-serif tracking-wide text-sm md:text-base border-b-4 border-transparent">
+                TICKET DE DOMICILIO
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- PANEL: FACTURA                                                -->
+    <!-- ============================================================= -->
+    <div id="panelFactura" class="tab-panel active">
+        <div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
+
+            <!-- PANEL IZQUIERDO: FORMULARIO -->
+            <div class="w-full xl:w-5/12 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-fit xl:sticky xl:top-24 border-t-4 border-[#0B3A28]">
+                <div class="bg-[#0B3A28] p-5 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <svg class="h-6 w-6 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        <h2 class="text-xl font-bold font-serif">Datos de la Factura</h2>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6 overflow-y-auto" style="max-height: 80vh;">
+                    <!-- Datos Cliente -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Información del Cliente</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
+                                <input type="text" id="clientName" value="Diana Garzón" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Celular / WhatsApp</label>
+                                    <input type="text" id="clientPhone" value="3217339584" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Fecha</label>
+                                    <input type="text" id="date" value="26 MAYO 2025" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
+                                <input type="text" id="clientAddress" value="Calle 9b #50as-26 Bonanzas Jamundí" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">N° Factura</label>
+                                <input type="text" id="invoiceNumber" value="001" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Productos -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Productos / Servicios</h3>
+                        <div id="itemsContainer" class="space-y-3">
+                            <!-- Items inyectados -->
+                        </div>
+                        <button onclick="addItem()" class="flex items-center gap-1 text-[#C5A861] font-bold hover:text-yellow-600 text-sm mt-2 transition">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            Añadir Fila
+                        </button>
+                    </div>
+
+                    <!-- Abono -->
+                    <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-md font-semibold text-[#0B3A28]">Pagos</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Abona ($)</label>
+                            <input type="number" id="deposit" value="20000" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateInvoice()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
+                    <button onclick="downloadImage()" id="downloadBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        1. Descargar Factura (Imagen)
+                    </button>
+
+                    <button onclick="sendWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        2. Enviar por WhatsApp
+                    </button>
+                    <p class="text-xs text-center text-gray-500 mt-1">Descarga primero la imagen para adjuntarla en el chat.</p>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: VISTA PREVIA FACTURA -->
+            <div class="w-full xl:w-7/12 flex flex-col items-center overflow-x-auto pb-8">
+                <div id="invoicePreview" class="bg-[#F4F1EA] shadow-2xl relative w-[794px] min-w-[794px] overflow-hidden" style="min-height: 1123px;">
+
+                    <div class="absolute top-0 left-0 w-64 h-64 bg-[#0B3A28] opacity-10 rounded-br-[100%] pointer-events-none"></div>
+                    <div class="absolute bottom-0 right-0 w-80 h-80 bg-[#0B3A28] opacity-10 rounded-tl-[100%] pointer-events-none"></div>
+
+                    <div class="relative z-10 px-12 py-10 flex flex-col h-full min-h-[1123px]">
+
+                        <!-- HEADER -->
+                        <div class="flex justify-between items-start mb-8">
+                            <div class="bg-[#0B3A28] text-center py-6 px-10 w-[55%] relative">
+                                <h1 class="text-4xl font-serif text-white tracking-widest mb-2">PACIFIC FAJAS</h1>
+                                <div class="flex items-center justify-center gap-2 mb-2">
+                                    <div class="h-px bg-[#C5A861] w-12"></div>
+                                    <div class="w-2 h-2 border border-[#C5A861] rotate-45"></div>
+                                    <div class="h-px bg-[#C5A861] w-12"></div>
+                                </div>
+                                <p class="text-[#C5A861] text-xs tracking-[0.2em] uppercase">Fajas y Ropa Interior</p>
+                            </div>
+
+                            <div class="w-[40%] text-right pt-4">
+                                <h2 class="text-3xl font-serif text-[#0B3A28] tracking-widest mb-1">FACTURA</h2>
+                                <div class="flex items-center justify-end gap-2 mb-4">
+                                    <div class="h-px bg-[#C5A861] w-full max-w-[100px]"></div>
+                                    <div class="w-2 h-2 border border-[#C5A861] rotate-45"></div>
+                                    <div class="h-px bg-[#C5A861] w-full max-w-[100px]"></div>
+                                </div>
+                                <div class="text-2xl font-bold text-[#0B3A28] mb-4">Nº <span id="outInvoiceNumber"></span></div>
+                                <div class="text-sm text-[#0B3A28]">
+                                    <p class="mb-1">FECHA:</p>
+                                    <p id="outDate" class="uppercase"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CAJA CLIENTE -->
+                        <div class="border border-[#C5A861] rounded-2xl p-5 mb-8 bg-[#F4F1EA] relative z-10 mx-2 shadow-sm">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                    </div>
+                                    <div class="flex gap-2 items-center w-full">
+                                        <span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide">Cliente:</span>
+                                        <span id="outClientName" class="text-gray-800 text-lg"></span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                    </div>
+                                    <div class="flex gap-2 items-center w-full">
+                                        <span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide">Celular:</span>
+                                        <span id="outClientPhone" class="text-gray-800 text-lg"></span>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white mt-0.5">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                                    </div>
+                                    <div class="flex gap-2 items-start w-full">
+                                        <span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide mt-1">Dirección:</span>
+                                        <span id="outClientAddress" class="text-gray-800 text-lg flex-1"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABLA -->
+                        <div class="border border-[#C5A861] rounded-xl overflow-hidden mb-8 bg-[#FDFCF8] shadow-sm mx-2">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-[#0B3A28] text-white">
+                                        <th class="py-3 px-4 font-semibold text-sm w-20 text-center border-r border-[#0B3A28]/50">CANT.</th>
+                                        <th class="py-3 px-4 font-semibold text-sm text-center border-r border-[#0B3A28]/50">DESCRIPCIÓN</th>
+                                        <th class="py-3 px-4 font-semibold text-sm w-32 text-center border-r border-[#0B3A28]/50">VALOR UNIT.</th>
+                                        <th class="py-3 px-4 font-semibold text-sm w-32 text-center">VALOR TOTAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="outItemsTable">
+                                    <!-- Inyectado por JS -->
+                                </tbody>
+                            </table>
+                            <div class="h-24 bg-[#FDFCF8]"></div>
+                        </div>
+
+                        <!-- TOTALES -->
+                        <div class="flex justify-end mx-2 mb-10">
+                            <div class="w-64">
+                                <div class="flex border-b border-[#E5DFCD]">
+                                    <div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">SUBTOTAL</div>
+                                    <div id="outSubtotal" class="w-1/2 bg-white py-2 px-4 text-right text-gray-800"></div>
+                                </div>
+                                <div class="flex border-b border-[#E5DFCD]">
+                                    <div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">ABONA</div>
+                                    <div id="outDeposit" class="w-1/2 bg-white py-2 px-4 text-right text-gray-800"></div>
+                                </div>
+                                <div class="flex">
+                                    <div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">DEBE</div>
+                                    <div id="outDebe" class="w-1/2 bg-white py-2 px-4 text-right text-[#0B3A28] font-bold text-lg"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NOTA Y DIBUJO -->
+                        <div class="mt-auto flex gap-6 mx-2">
+                            <div class="border border-[#C5A861] rounded-2xl p-4 bg-[#FDFCF8] flex-1 flex flex-col justify-center">
+                                <div class="flex gap-3 mb-2 items-center">
+                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center text-white font-bold text-xl shrink-0">!</div>
+                                    <h3 class="font-bold text-[#0B3A28] tracking-wide">NOTA IMPORTANTE</h3>
+                                </div>
+                                <p class="text-[11px] text-gray-700 leading-relaxed text-justify mb-3 pr-2">
+                                    Los arreglos no tienen garantía porque son modificaciones sobre una prenda ya confeccionada y el resultado final puede variar según el uso, la horma y el estado de la faja o brasier. Sin embargo, realizamos cada ajuste con el mayor cuidado y calidad posible. Después de esta modificación, cualquier ajuste adicional tendrá costo.
+                                </p>
+                                <p class="font-script text-2xl text-center text-[#0B3A28] mt-2">Gracias por tu comprensión ❤️</p>
+                            </div>
+
+                            <div class="w-48 flex items-center justify-center">
+                                <svg width="120" height="150" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M25 20 C30 40, 35 60, 25 100 L75 100 C65 60, 70 40, 75 20 Z" stroke="#0B3A28" stroke-width="2" fill="#FDFCF8"/>
+                                    <path d="M25 20 L20 5 M75 20 L80 5" stroke="#0B3A28" stroke-width="2"/>
+                                    <line x1="28" y1="30" x2="72" y2="30" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
+                                    <line x1="30" y1="50" x2="70" y2="50" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
+                                    <line x1="30" y1="70" x2="70" y2="70" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
+                                    <line x1="28" y1="90" x2="72" y2="90" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
+                                    <line x1="45" y1="20" x2="45" y2="100" stroke="#0B3A28" stroke-width="1"/>
+                                    <line x1="55" y1="20" x2="55" y2="100" stroke="#0B3A28" stroke-width="1"/>
+                                    <circle cx="50" cy="30" r="1.5" fill="#0B3A28"/>
+                                    <circle cx="50" cy="45" r="1.5" fill="#0B3A28"/>
+                                    <circle cx="50" cy="60" r="1.5" fill="#0B3A28"/>
+                                    <circle cx="50" cy="75" r="1.5" fill="#0B3A28"/>
+                                    <circle cx="50" cy="90" r="1.5" fill="#0B3A28"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Eslogan -->
+                        <div class="text-center mt-4 mb-4">
+                            <p class="font-script text-3xl text-[#0B3A28]">¡Tu comodidad es nuestra prioridad!</p>
+                        </div>
+
+                        <!-- BARRA INFERIOR -->
+                        <div class="bg-[#0B3A28] text-white py-3 px-6 rounded-full flex justify-center items-center gap-6 mx-8 text-sm">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                                <span>@pacificfajas</span>
+                            </div>
+                            <div class="w-px h-4 bg-[#C5A861]"></div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                <span>317 233 5456</span>
+                            </div>
+                            <div class="w-px h-4 bg-[#C5A861]"></div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                                <span>Colombia</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- PANEL: TICKET DE DOMICILIO                                    -->
+    <!-- ============================================================= -->
+    <div id="panelTicket" class="tab-panel">
+        <div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
+
+            <!-- PANEL IZQUIERDO: FORMULARIO -->
+            <div class="w-full xl:w-5/12 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-fit xl:sticky xl:top-24 border-t-4 border-[#0B3A28]">
+                <div class="bg-[#0B3A28] p-5 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <svg class="h-6 w-6 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l1.664-1.664a2 2 0 011.414-.586h11.844a2 2 0 011.414.586L21 7m-18 0v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7h18M8 11h8M8 15h4" /></svg>
+                        <h2 class="text-xl font-bold font-serif">Datos del Domicilio</h2>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-4 overflow-y-auto" style="max-height: 80vh;">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Nombre del Cliente</label>
+                        <input type="text" id="tCliente" value="" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Teléfono</label>
+                        <input type="text" id="tTelefono" value="" placeholder="Número de contacto" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
+                        <input type="text" id="tDireccion" value="" placeholder="Dirección de entrega" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Productos / Pedido</label>
+                        <textarea id="tPedido" rows="3" placeholder="Detalle del pedido" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Domicilio Ida ($)</label>
+                            <input type="number" id="tDomIda" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Domicilio Vuelta ($)</label>
+                            <input type="number" id="tDomVuelta" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Total a pagar ($)</label>
+                        <input type="number" id="tTotal" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateTicket()">
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
+                    <button onclick="downloadTicketImage()" id="downloadTicketBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Descargar Ticket (Imagen)
+                    </button>
+                    <button onclick="sendTicketWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        Enviar por WhatsApp
+                    </button>
+                    <p class="text-xs text-center text-gray-500 mt-1">Descarga primero la imagen para adjuntarla en el chat.</p>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: VISTA PREVIA TICKET -->
+            <div class="w-full xl:w-7/12 flex flex-col items-center pb-8">
+                <div id="ticketPreview" class="bg-[#FDFCF8] shadow-2xl relative w-[380px] min-w-[380px] p-7 border border-[#C5A861]/40">
+                    <div class="text-center mb-3">
+                        <h1 class="text-2xl font-serif text-[#0B3A28] tracking-widest">PACIFIC FAJAS</h1>
+                        <div class="flex items-center justify-center gap-2 my-1">
+                            <div class="h-px bg-[#C5A861] w-10"></div>
+                            <div class="w-1.5 h-1.5 border border-[#C5A861] rotate-45"></div>
+                            <div class="h-px bg-[#C5A861] w-10"></div>
+                        </div>
+                        <p class="text-[#C5A861] text-[10px] tracking-[0.2em] uppercase">Ticket de Domicilio</p>
+                    </div>
+
+                    <div class="ticket-dash my-3"></div>
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex gap-2">
+                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Cliente:</span>
+                            <span id="outTCliente" class="text-gray-800">---</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Teléfono:</span>
+                            <span id="outTTelefono" class="text-gray-800">---</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Dirección:</span>
+                            <span id="outTDireccion" class="text-gray-800 flex-1">---</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-dash my-3"></div>
+
+                    <div>
+                        <p class="font-bold text-[#0B3A28] uppercase text-xs tracking-wide mb-1">Pedido:</p>
+                        <p id="outTPedido" class="text-sm text-gray-800 whitespace-pre-line">---</p>
+                    </div>
+
+                    <div class="ticket-dash my-3"></div>
+
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-700">Domicilio Ida</span>
+                            <span id="outTDomIda" class="text-gray-800">$0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-700">Domicilio Vuelta</span>
+                            <span id="outTDomVuelta" class="text-gray-800">$0</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-dash my-3"></div>
+
+                    <div class="flex justify-between items-center bg-[#0B3A28] text-white rounded-lg py-2 px-4 mb-3">
+                        <span class="font-bold text-sm tracking-wide">TOTAL</span>
+                        <span id="outTTotal" class="font-bold text-lg">$0</span>
+                    </div>
+
+                    <p class="text-center font-script text-xl text-[#0B3A28] mt-2">¡Gracias por tu compra!</p>
+                    <p class="text-center text-[10px] text-gray-500 mt-1">@pacificfajas · 317 233 5456</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formatCurrency = (value) => {
+            return '$' + new Intl.NumberFormat('es-CO').format(value || 0);
+        };
+
+        /* ===================== TABS ===================== */
+        function switchTab(tab) {
+            const panelFactura = document.getElementById('panelFactura');
+            const panelTicket = document.getElementById('panelTicket');
+            const btnFactura = document.getElementById('tabBtnFactura');
+            const btnTicket = document.getElementById('tabBtnTicket');
+
+            if (tab === 'factura') {
+                panelFactura.classList.add('active');
+                panelTicket.classList.remove('active');
+                btnFactura.classList.add('border-[#C5A861]', 'text-white', 'bg-white/5');
+                btnFactura.classList.remove('border-transparent', 'text-white/70');
+                btnTicket.classList.remove('border-[#C5A861]', 'text-white', 'bg-white/5');
+                btnTicket.classList.add('border-transparent', 'text-white/70');
+            } else {
+                panelTicket.classList.add('active');
+                panelFactura.classList.remove('active');
+                btnTicket.classList.add('border-[#C5A861]', 'text-white', 'bg-white/5');
+                btnTicket.classList.remove('border-transparent', 'text-white/70');
+                btnFactura.classList.remove('border-[#C5A861]', 'text-white', 'bg-white/5');
+                btnFactura.classList.add('border-transparent', 'text-white/70');
+            }
+        }
+
+        /* ===================== FACTURA ===================== */
+        let items = [
+            { id: 1, qty: 1, desc: 'Reducción 2 tallas\n(dejar en L , contorno y cintura)', price: 20000 },
+            { id: 2, qty: 1, desc: 'Cortar mangas', price: 5000 },
+            { id: 3, qty: 1, desc: 'Domicilio ida', price: 7000 },
+            { id: 4, qty: 1, desc: 'Domicilio vuelta', price: 0 }
+        ];
+
+        function initApp() {
+            renderItemsForm();
+            updateInvoice();
+            updateTicket();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        function renderItemsForm() {
+            const container = document.getElementById('itemsContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+            items.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = "flex gap-2 items-start bg-white p-3 rounded border border-gray-200 shadow-sm";
+                div.innerHTML = `
+                    <div class="flex-1 space-y-2">
+                        <div class="flex gap-2">
+                            <input type="number" value="${item.qty}" oninput="updateItem(${item.id}, 'qty', this.value)" placeholder="Cant." class="w-16 p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">
+                            <input type="number" value="${item.price}" oninput="updateItem(${item.id}, 'price', this.value)" placeholder="V. Unitario" class="w-28 p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">
+                        </div>
+                        <textarea rows="2" oninput="updateItem(${item.id}, 'desc', this.value)" placeholder="Descripción" class="w-full p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">${item.desc}</textarea>
+                    </div>
+                    <button onclick="removeItem(${item.id})" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Eliminar Fila">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addItem() {
+            items.push({ id: Date.now(), qty: 1, desc: '', price: 0 });
+            renderItemsForm();
+            updateInvoice();
+        }
+
+        function removeItem(id) {
+            items = items.filter(item => item.id !== id);
+            renderItemsForm();
+            updateInvoice();
+        }
+
+        function updateItem(id, field, value) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item[field] = field === 'desc' ? value : Number(value);
+                updateInvoice();
+            }
+        }
+
+        function updateInvoice() {
+            const getEl = id => document.getElementById(id);
+            if (!getEl('outClientName')) return;
+
+            getEl('outClientName').innerText = getEl('clientName').value;
+            getEl('outClientPhone').innerText = getEl('clientPhone').value;
+            getEl('outClientAddress').innerText = getEl('clientAddress').value;
+            getEl('outInvoiceNumber').innerText = getEl('invoiceNumber').value;
+            getEl('outDate').innerText = getEl('date').value;
+
+            const table = getEl('outItemsTable');
+            table.innerHTML = '';
+            let subtotal = 0;
+
+            items.forEach((item) => {
+                const totalItem = item.qty * item.price;
+                subtotal += totalItem;
+
+                table.innerHTML += `
+                    <tr class="table-row-dashed bg-white">
+                        <td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${item.qty}</td>
+                        <td class="py-3 px-4 border-r border-[#C5A861]/30 text-gray-700 whitespace-pre-line text-lg">${item.desc}</td>
+                        <td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${formatCurrency(item.price)}</td>
+                        <td class="py-3 px-4 text-center text-gray-800 text-lg">${formatCurrency(totalItem)}</td>
+                    </tr>
+                `;
+            });
+
+            const deposit = Number(getEl('deposit').value) || 0;
+            const debe = subtotal - deposit;
+
+            getEl('outSubtotal').innerText = formatCurrency(subtotal);
+            getEl('outDeposit').innerText = formatCurrency(deposit);
+            getEl('outDebe').innerText = formatCurrency(debe < 0 ? 0 : debe);
+        }
+
+        function downloadImage() {
+            const btn = document.getElementById('downloadBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Generando Imagen...';
+            btn.disabled = true;
+
+            const element = document.getElementById('invoicePreview');
+
+            html2canvas(element, {
+                scale: 2,
+                backgroundColor: '#F4F1EA',
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const invNum = document.getElementById('invoiceNumber').value || '001';
+                link.download = `Factura-PacificFajas-${invNum}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error('Error generando imagen:', err);
+                alert('Hubo un error al generar la imagen.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function sendWhatsApp() {
+            let phone = document.getElementById('clientPhone').value.replace(/\D/g, '');
+
+            if (!phone) {
+                alert('Por favor, ingresa el número de celular del cliente.');
+                return;
+            }
+
+            if (phone.length === 10) {
+                phone = '57' + phone;
+            }
+
+            const name = document.getElementById('clientName').value.split(' ')[0] || 'Cliente';
+            const invNum = document.getElementById('invoiceNumber').value;
+            const debe = document.getElementById('outDebe').innerText;
+
+            let text = `Hola ${name}, desde *Pacific Fajas* te enviamos el resumen de tu Factura N° ${invNum}.\n\n`;
+            text += `💰 *Saldo Pendiente:* ${debe}\n\n`;
+            text += `¡Gracias por tu confianza!\n_(Te enviaré la imagen de la factura a continuación)_`;
+
+            const encodedText = encodeURIComponent(text);
+            const url = `https://wa.me/${phone}?text=${encodedText}`;
+
+            window.open(url, '_blank');
+        }
+
+        /* ===================== TICKET DE DOMICILIO ===================== */
+        function updateTicket() {
+            const getEl = id => document.getElementById(id);
+            if (!getEl('outTCliente')) return;
+
+            getEl('outTCliente').innerText = getEl('tCliente').value || '---';
+            getEl('outTTelefono').innerText = getEl('tTelefono').value || '---';
+            getEl('outTDireccion').innerText = getEl('tDireccion').value || '---';
+            getEl('outTPedido').innerText = getEl('tPedido').value || '---';
+            getEl('outTDomIda').innerText = formatCurrency(getEl('tDomIda').value);
+            getEl('outTDomVuelta').innerText = formatCurrency(getEl('tDomVuelta').value);
+            getEl('outTTotal').innerText = formatCurrency(getEl('tTotal').value);
+        }
+
+        function downloadTicketImage() {
+            const btn = document.getElementById('downloadTicketBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Generando Imagen...';
+            btn.disabled = true;
+
+            const element = document.getElementById('ticketPreview');
+
+            html2canvas(element, {
+                scale: 2,
+                backgroundColor: '#FDFCF8',
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const cliente = document.getElementById('tCliente').value.replace(/\s+/g, '') || 'Cliente';
+                link.download = `Ticket-Domicilio-${cliente}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error('Error generando imagen:', err);
+                alert('Hubo un error al generar la imagen.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function sendTicketWhatsApp() {
+            let phone = document.getElementById('tTelefono').value.replace(/\D/g, '');
+
+            if (!phone) {
+                alert('Por favor, ingresa el número de teléfono del cliente.');
+                return;
+            }
+
+            if (phone.length === 10) {
+                phone = '57' + phone;
+            }
+
+            const name = document.getElementById('tCliente').value.split(' ')[0] || 'Cliente';
+            const total = document.getElementById('outTTotal').innerText;
+
+            let text = `Hola ${name}, desde *Pacific Fajas* te confirmamos tu domicilio.\n\n`;
+            text += `💰 *Total a pagar:* ${total}\n\n`;
+            text += `¡Gracias por tu compra!\n_(Te enviaré la imagen del ticket a continuación)_`;
+
+            const encodedText = encodeURIComponent(text);
+            const url = `https://wa.me/${phone}?text=${encodedText}`;
+
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
