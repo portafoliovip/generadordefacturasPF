@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pacific Fajas - Generador de Facturas y Tickets</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -31,6 +28,59 @@
             background-image: repeating-linear-gradient(90deg, #C5A861 0 10px, transparent 10px 20px);
             height: 2px;
         }
+
+        /* Sello CANCELADO */
+        #stampCancelado {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+            border: 8px solid #cc0000;
+            color: #cc0000;
+            font-family: 'Playfair Display', serif;
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            padding: 10px 24px;
+            border-radius: 8px;
+            opacity: 0.45;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 100;
+            text-transform: uppercase;
+            display: none;
+        }
+
+        /* Toggle switch style */
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-input { display: none; }
+        .toggle-track {
+            width: 44px; height: 24px;
+            background: #d1d5db;
+            border-radius: 9999px;
+            position: relative;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .toggle-thumb {
+            width: 18px; height: 18px;
+            background: white;
+            border-radius: 9999px;
+            position: absolute;
+            top: 3px; left: 3px;
+            transition: left 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .toggle-input:checked + .toggle-track { background: #0B3A28; }
+        .toggle-input:checked + .toggle-track .toggle-thumb { left: 23px; }
+
+        input[type=checkbox].dom-check { accent-color: #0B3A28; width:16px; height:16px; cursor:pointer; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
@@ -69,25 +119,25 @@
                         <div class="grid grid-cols-1 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
-                                <input type="text" id="clientName" value="Diana Garzón" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                                <input type="text" id="clientName" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice(); syncToTicket()">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600 mb-1">Celular / WhatsApp</label>
-                                    <input type="text" id="clientPhone" value="3217339584" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                                    <input type="text" id="clientPhone" placeholder="Número de celular" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice(); syncToTicket()">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600 mb-1">Fecha</label>
-                                    <input type="date" id="date" value="2026-06-22" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateInvoice()">
+                                    <input type="date" id="date" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateInvoice()">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
-                                <input type="text" id="clientAddress" value="Calle 9b #50as-26 Bonanzas Jamundí" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                                <input type="text" id="clientAddress" placeholder="Dirección del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice(); syncToTicket()">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">N° Factura</label>
-                                <input type="text" id="invoiceNumber" value="001" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice()">
+                                <input type="text" id="invoiceNumber" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-gray-50 font-bold text-[#0B3A28]" oninput="updateInvoice(); saveLastInvoiceNumber()">
                             </div>
                         </div>
                     </div>
@@ -95,9 +145,7 @@
                     <!-- Productos -->
                     <div class="space-y-4">
                         <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Productos / Servicios</h3>
-                        <div id="itemsContainer" class="space-y-3">
-                            <!-- Items inyectados -->
-                        </div>
+                        <div id="itemsContainer" class="space-y-3"></div>
                         <button onclick="addItem()" class="flex items-center gap-1 text-[#C5A861] font-bold hover:text-yellow-600 text-sm mt-2 transition">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                             Añadir Fila
@@ -109,9 +157,29 @@
                         <h3 class="text-md font-semibold text-[#0B3A28]">Pagos</h3>
                         <div>
                             <label class="block text-sm font-medium text-gray-600 mb-1">Abona ($)</label>
-                            <input type="number" id="deposit" value="20000" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateInvoice()">
+                            <input type="number" id="deposit" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateInvoice()">
                         </div>
                     </div>
+
+                    <!-- CANCELADO toggle -->
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-red-700 text-sm">Marcar como CANCELADO</p>
+                            <p class="text-xs text-red-500 mt-0.5">Agrega un sello a la imagen de la factura</p>
+                        </div>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="canceladoCheck" class="toggle-input" onchange="toggleCancelado()">
+                            <div class="toggle-track">
+                                <div class="toggle-thumb"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Nueva Factura -->
+                    <button onclick="nuevaFactura()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-[#0B3A28] font-bold border-2 border-[#0B3A28] hover:bg-[#0B3A28] hover:text-white transition-all">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        Nueva Factura (limpiar + consecutivo)
+                    </button>
                 </div>
 
                 <!-- Botones de Acción -->
@@ -120,7 +188,6 @@
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                         1. Descargar Factura (Imagen)
                     </button>
-
                     <button onclick="sendWhatsApp()" id="sendWhatsAppBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                         2. Enviar por WhatsApp
@@ -132,6 +199,9 @@
             <!-- PANEL DERECHO: VISTA PREVIA FACTURA -->
             <div class="w-full xl:w-7/12 flex flex-col items-center overflow-x-auto pb-8">
                 <div id="invoicePreview" class="bg-[#F4F1EA] shadow-2xl relative w-[794px] min-w-[794px] overflow-hidden" style="min-height: 1123px;">
+
+                    <!-- SELLO CANCELADO -->
+                    <div id="stampCancelado">CANCELADO</div>
 
                     <div class="absolute top-0 left-0 w-64 h-64 bg-[#0B3A28] opacity-10 rounded-br-[100%] pointer-events-none"></div>
                     <div class="absolute bottom-0 right-0 w-80 h-80 bg-[#0B3A28] opacity-10 rounded-tl-[100%] pointer-events-none"></div>
@@ -149,7 +219,6 @@
                                 </div>
                                 <p class="text-[#C5A861] text-xs tracking-[0.2em] uppercase">Fajas y Ropa Interior</p>
                             </div>
-
                             <div class="w-[40%] text-right pt-4">
                                 <h2 class="text-3xl font-serif text-[#0B3A28] tracking-widest mb-1">FACTURA</h2>
                                 <div class="flex items-center justify-end gap-2 mb-4">
@@ -209,9 +278,7 @@
                                         <th class="py-3 px-4 font-semibold text-sm w-32 text-center">VALOR TOTAL</th>
                                     </tr>
                                 </thead>
-                                <tbody id="outItemsTable">
-                                    <!-- Inyectado por JS -->
-                                </tbody>
+                                <tbody id="outItemsTable"></tbody>
                             </table>
                             <div class="h-24 bg-[#FDFCF8]"></div>
                         </div>
@@ -246,7 +313,6 @@
                                 </p>
                                 <p class="font-script text-2xl text-center text-[#0B3A28] mt-2">Gracias por tu comprensión ❤️</p>
                             </div>
-
                             <div class="w-48 flex items-center justify-center">
                                 <svg width="120" height="150" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M25 20 C30 40, 35 60, 25 100 L75 100 C65 60, 70 40, 75 20 Z" stroke="#0B3A28" stroke-width="2" fill="#FDFCF8"/>
@@ -310,43 +376,64 @@
                 </div>
 
                 <div class="p-6 space-y-4 overflow-y-auto" style="max-height: 80vh;">
+
+                    <!-- Info copiada de factura -->
+                    <div class="bg-[#f0f7f4] border border-[#0B3A28]/20 rounded-lg p-3 flex items-start gap-2">
+                        <svg class="w-4 h-4 text-[#0B3A28] mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        <p class="text-xs text-[#0B3A28]">Los campos de nombre, teléfono y dirección se copian automáticamente desde la Factura. Puedes editarlos aquí si necesitas.</p>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Nombre del Cliente</label>
-                        <input type="text" id="tCliente" value="" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                        <input type="text" id="tCliente" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Teléfono</label>
-                        <input type="text" id="tTelefono" value="" placeholder="Número de contacto" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                        <input type="text" id="tTelefono" placeholder="Número de contacto" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Fecha</label>
-                        <input type="date" id="tFecha" value="2026-06-22" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateTicket()">
+                        <input type="date" id="tFecha" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateTicket()">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
-                        <input type="text" id="tDireccion" value="" placeholder="Dirección de entrega" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                        <input type="text" id="tDireccion" placeholder="Dirección de entrega" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Productos / Pedido</label>
                         <textarea id="tPedido" rows="3" placeholder="Detalle del pedido" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></textarea>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Domicilio Ida ($)</label>
-                            <input type="number" id="tDomIda" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+
+                    <!-- Domicilios con checkbox -->
+                    <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-sm font-semibold text-[#0B3A28]">Domicilios</h3>
+
+                        <!-- Ida -->
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="checkDomIda" class="dom-check" onchange="updateTicket()">
+                            <label for="checkDomIda" class="text-sm font-medium text-gray-700 w-32">Domicilio Ida</label>
+                            <input type="number" id="tDomIda" value="0" placeholder="$" class="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateTicket()">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Domicilio Vuelta ($)</label>
-                            <input type="number" id="tDomVuelta" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+
+                        <!-- Vuelta -->
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="checkDomVuelta" class="dom-check" onchange="updateTicket()">
+                            <label for="checkDomVuelta" class="text-sm font-medium text-gray-700 w-32">Domicilio Vuelta</label>
+                            <input type="number" id="tDomVuelta" value="0" placeholder="$" class="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateTicket()">
                         </div>
+
+                        <p class="text-xs text-gray-500 mt-1">✅ Marca la casilla para incluir el domicilio en el total. El valor se ingresa manualmente.</p>
                     </div>
+
+                    <!-- Total automático -->
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Total a pagar ($)</label>
-                        <input type="number" id="tTotal" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateTicket()">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Total a pagar ($) <span class="text-[#0B3A28] font-bold">(se calcula automáticamente)</span></label>
+                        <input type="number" id="tTotal" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold text-lg text-[#0B3A28]" oninput="updateTicket()">
+                        <p class="text-xs text-gray-500 mt-1">Suma automática de los domicilios marcados. También puedes editarlo manualmente.</p>
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
+                <!-- Botones -->
                 <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
                     <button onclick="downloadTicketImage()" id="downloadTicketBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -403,12 +490,12 @@
 
                     <div class="ticket-dash my-3"></div>
 
-                    <div class="space-y-1 text-sm">
-                        <div class="flex justify-between">
+                    <div class="space-y-1 text-sm" id="ticketDomSection">
+                        <div id="rowDomIda" class="flex justify-between" style="display:none!important">
                             <span class="text-gray-700">Domicilio Ida</span>
                             <span id="outTDomIda" class="text-gray-800">$0</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div id="rowDomVuelta" class="flex justify-between" style="display:none!important">
                             <span class="text-gray-700">Domicilio Vuelta</span>
                             <span id="outTDomVuelta" class="text-gray-800">$0</span>
                         </div>
@@ -429,9 +516,8 @@
     </div>
 
     <script>
-        const formatCurrency = (value) => {
-            return '$' + new Intl.NumberFormat('es-CO').format(value || 0);
-        };
+        /* ===================== UTILS ===================== */
+        const formatCurrency = (value) => '$' + new Intl.NumberFormat('es-CO').format(value || 0);
 
         const formatDateSpanish = (dateStr) => {
             if (!dateStr) return '';
@@ -443,54 +529,56 @@
             return `${d} DE ${months[m - 1]} DE ${y}`;
         };
 
+        const todayValue = () => {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        };
+
         /* ===================== TABS ===================== */
         function switchTab(tab) {
-            const panelFactura = document.getElementById('panelFactura');
-            const panelTicket = document.getElementById('panelTicket');
-            const btnFactura = document.getElementById('tabBtnFactura');
-            const btnTicket = document.getElementById('tabBtnTicket');
+            const pF = document.getElementById('panelFactura');
+            const pT = document.getElementById('panelTicket');
+            const bF = document.getElementById('tabBtnFactura');
+            const bT = document.getElementById('tabBtnTicket');
 
             if (tab === 'factura') {
-                panelFactura.classList.add('active');
-                panelTicket.classList.remove('active');
-                btnFactura.classList.add('border-[#C5A861]', 'text-white', 'bg-white/5');
-                btnFactura.classList.remove('border-transparent', 'text-white/70');
-                btnTicket.classList.remove('border-[#C5A861]', 'text-white', 'bg-white/5');
-                btnTicket.classList.add('border-transparent', 'text-white/70');
+                pF.classList.add('active'); pT.classList.remove('active');
+                bF.classList.add('border-[#C5A861]','text-white','bg-white/5');
+                bF.classList.remove('border-transparent','text-white/70');
+                bT.classList.remove('border-[#C5A861]','text-white','bg-white/5');
+                bT.classList.add('border-transparent','text-white/70');
             } else {
-                panelTicket.classList.add('active');
-                panelFactura.classList.remove('active');
-                btnTicket.classList.add('border-[#C5A861]', 'text-white', 'bg-white/5');
-                btnTicket.classList.remove('border-transparent', 'text-white/70');
-                btnFactura.classList.remove('border-[#C5A861]', 'text-white', 'bg-white/5');
-                btnFactura.classList.add('border-transparent', 'text-white/70');
+                pT.classList.add('active'); pF.classList.remove('active');
+                bT.classList.add('border-[#C5A861]','text-white','bg-white/5');
+                bT.classList.remove('border-transparent','text-white/70');
+                bF.classList.remove('border-[#C5A861]','text-white','bg-white/5');
+                bF.classList.add('border-transparent','text-white/70');
             }
         }
 
-        /* ===================== FACTURA ===================== */
-        let items = [
-            { id: 1, qty: 1, desc: 'Reducción 2 tallas\n(dejar en L , contorno y cintura)', price: 20000 },
-            { id: 2, qty: 1, desc: 'Cortar mangas', price: 5000 },
-            { id: 3, qty: 1, desc: 'Domicilio ida', price: 7000 },
-            { id: 4, qty: 1, desc: 'Domicilio vuelta', price: 0 }
-        ];
-
-        function initApp() {
-            renderItemsForm();
-            updateInvoice();
-            updateTicket();
+        /* ===================== CONSECUTIVO ===================== */
+        function getLastInvoiceNumber() {
+            return localStorage.getItem('pf_lastInvoice') || '0';
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
+        function saveLastInvoiceNumber() {
+            const val = document.getElementById('invoiceNumber').value;
+            localStorage.setItem('pf_lastInvoice', val);
         }
+
+        function nextInvoiceNumber() {
+            const last = getLastInvoiceNumber();
+            const num = parseInt(last, 10);
+            if (isNaN(num)) return '001';
+            return String(num + 1).padStart(3, '0');
+        }
+
+        /* ===================== FACTURA – ITEMS ===================== */
+        let items = [];
 
         function renderItemsForm() {
             const container = document.getElementById('itemsContainer');
             if (!container) return;
-
             container.innerHTML = '';
             items.forEach((item) => {
                 const div = document.createElement('div');
@@ -518,7 +606,7 @@
         }
 
         function removeItem(id) {
-            items = items.filter(item => item.id !== id);
+            items = items.filter(i => i.id !== id);
             renderItemsForm();
             updateInvoice();
         }
@@ -531,24 +619,69 @@
             }
         }
 
+        /* ===================== NUEVA FACTURA ===================== */
+        function nuevaFactura() {
+            if (!confirm('¿Crear nueva factura? Los datos actuales se borrarán.')) return;
+
+            // Limpiar campos cliente
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientPhone').value = '';
+            document.getElementById('clientAddress').value = '';
+            document.getElementById('deposit').value = '0';
+            document.getElementById('date').value = todayValue();
+            document.getElementById('canceladoCheck').checked = false;
+            toggleCancelado();
+
+            // Siguiente número consecutivo
+            const next = nextInvoiceNumber();
+            document.getElementById('invoiceNumber').value = next;
+            saveLastInvoiceNumber();
+
+            // Vaciar filas
+            items = [];
+            renderItemsForm();
+            updateInvoice();
+
+            // Limpiar sync al ticket
+            syncToTicket();
+        }
+
+        /* ===================== SELLO CANCELADO ===================== */
+        function toggleCancelado() {
+            const stamp = document.getElementById('stampCancelado');
+            const checked = document.getElementById('canceladoCheck').checked;
+            stamp.style.display = checked ? 'block' : 'none';
+        }
+
+        /* ===================== SYNC TICKET ===================== */
+        function syncToTicket() {
+            const name = document.getElementById('clientName').value;
+            const phone = document.getElementById('clientPhone').value;
+            const address = document.getElementById('clientAddress').value;
+            document.getElementById('tCliente').value = name;
+            document.getElementById('tTelefono').value = phone;
+            document.getElementById('tDireccion').value = address;
+            updateTicket();
+        }
+
+        /* ===================== UPDATE INVOICE ===================== */
         function updateInvoice() {
-            const getEl = id => document.getElementById(id);
-            if (!getEl('outClientName')) return;
+            const g = id => document.getElementById(id);
+            if (!g('outClientName')) return;
 
-            getEl('outClientName').innerText = getEl('clientName').value;
-            getEl('outClientPhone').innerText = getEl('clientPhone').value;
-            getEl('outClientAddress').innerText = getEl('clientAddress').value;
-            getEl('outInvoiceNumber').innerText = getEl('invoiceNumber').value;
-            getEl('outDate').innerText = formatDateSpanish(getEl('date').value);
+            g('outClientName').innerText = g('clientName').value;
+            g('outClientPhone').innerText = g('clientPhone').value;
+            g('outClientAddress').innerText = g('clientAddress').value;
+            g('outInvoiceNumber').innerText = g('invoiceNumber').value;
+            g('outDate').innerText = formatDateSpanish(g('date').value);
 
-            const table = getEl('outItemsTable');
+            const table = g('outItemsTable');
             table.innerHTML = '';
             let subtotal = 0;
 
             items.forEach((item) => {
                 const totalItem = item.qty * item.price;
                 subtotal += totalItem;
-
                 table.innerHTML += `
                     <tr class="table-row-dashed bg-white">
                         <td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${item.qty}</td>
@@ -559,23 +692,63 @@
                 `;
             });
 
-            const deposit = Number(getEl('deposit').value) || 0;
+            const deposit = Number(g('deposit').value) || 0;
             const debe = subtotal - deposit;
 
-            getEl('outSubtotal').innerText = formatCurrency(subtotal);
-            getEl('outDeposit').innerText = formatCurrency(deposit);
-            getEl('outDebe').innerText = formatCurrency(debe < 0 ? 0 : debe);
+            g('outSubtotal').innerText = formatCurrency(subtotal);
+            g('outDeposit').innerText = formatCurrency(deposit);
+            g('outDebe').innerText = formatCurrency(debe < 0 ? 0 : debe);
         }
 
+        /* ===================== UPDATE TICKET ===================== */
+        function updateTicket() {
+            const g = id => document.getElementById(id);
+            if (!g('outTCliente')) return;
+
+            g('outTCliente').innerText = g('tCliente').value || '---';
+            g('outTFecha').innerText = formatDateSpanish(g('tFecha').value) || '---';
+            g('outTTelefono').innerText = g('tTelefono').value || '---';
+            g('outTDireccion').innerText = g('tDireccion').value || '---';
+            g('outTPedido').innerText = g('tPedido').value || '---';
+
+            const idaChecked = g('checkDomIda').checked;
+            const vueltaChecked = g('checkDomVuelta').checked;
+            const idaVal = Number(g('tDomIda').value) || 0;
+            const vueltaVal = Number(g('tDomVuelta').value) || 0;
+
+            // Mostrar / ocultar filas en preview
+            const rowIda = g('rowDomIda');
+            const rowVuelta = g('rowDomVuelta');
+
+            if (idaChecked) {
+                rowIda.style.setProperty('display', 'flex', 'important');
+                g('outTDomIda').innerText = formatCurrency(idaVal);
+            } else {
+                rowIda.style.setProperty('display', 'none', 'important');
+            }
+
+            if (vueltaChecked) {
+                rowVuelta.style.setProperty('display', 'flex', 'important');
+                g('outTDomVuelta').innerText = formatCurrency(vueltaVal);
+            } else {
+                rowVuelta.style.setProperty('display', 'none', 'important');
+            }
+
+            // Suma automática
+            const autoTotal = (idaChecked ? idaVal : 0) + (vueltaChecked ? vueltaVal : 0);
+            // Si el usuario escribe manualmente en tTotal, respetarlo; pero si hay cambio en checks/values, actualizar
+            g('tTotal').value = autoTotal;
+            g('outTTotal').innerText = formatCurrency(autoTotal);
+        }
+
+        /* ===================== DOWNLOAD FACTURA ===================== */
         function downloadImage() {
             const btn = document.getElementById('downloadBtn');
-            const originalText = btn.innerHTML;
+            const orig = btn.innerHTML;
             btn.innerHTML = 'Generando Imagen...';
             btn.disabled = true;
 
-            const element = document.getElementById('invoicePreview');
-
-            html2canvas(element, {
+            html2canvas(document.getElementById('invoicePreview'), {
                 scale: 2,
                 backgroundColor: '#F4F1EA',
                 useCORS: true
@@ -585,67 +758,38 @@
                 link.download = `Factura-PacificFajas-${invNum}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-
-                btn.innerHTML = originalText;
+                btn.innerHTML = orig;
                 btn.disabled = false;
             }).catch(err => {
-                console.error('Error generando imagen:', err);
+                console.error(err);
                 alert('Hubo un error al generar la imagen.');
-                btn.innerHTML = originalText;
+                btn.innerHTML = orig;
                 btn.disabled = false;
             });
         }
 
+        /* ===================== WHATSAPP FACTURA ===================== */
         function sendWhatsApp() {
             let phone = document.getElementById('clientPhone').value.replace(/\D/g, '');
-
-            if (!phone) {
-                alert('Por favor, ingresa el número de celular del cliente.');
-                return;
-            }
-
-            if (phone.length === 10) {
-                phone = '57' + phone;
-            }
-
+            if (!phone) { alert('Por favor, ingresa el número de celular del cliente.'); return; }
+            if (phone.length === 10) phone = '57' + phone;
             const name = document.getElementById('clientName').value.split(' ')[0] || 'Cliente';
             const invNum = document.getElementById('invoiceNumber').value;
             const debe = document.getElementById('outDebe').innerText;
-
             let text = `Hola ${name}, desde *Pacific Fajas* te enviamos el resumen de tu Factura N° ${invNum}.\n\n`;
             text += `💰 *Saldo Pendiente:* ${debe}\n\n`;
             text += `¡Gracias por tu confianza!\n_(Te enviaré la imagen de la factura a continuación)_`;
-
-            const encodedText = encodeURIComponent(text);
-            const url = `https://wa.me/${phone}?text=${encodedText}`;
-
-            window.open(url, '_blank');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
         }
 
-        /* ===================== TICKET DE DOMICILIO ===================== */
-        function updateTicket() {
-            const getEl = id => document.getElementById(id);
-            if (!getEl('outTCliente')) return;
-
-            getEl('outTCliente').innerText = getEl('tCliente').value || '---';
-            getEl('outTFecha').innerText = formatDateSpanish(getEl('tFecha').value) || '---';
-            getEl('outTTelefono').innerText = getEl('tTelefono').value || '---';
-            getEl('outTDireccion').innerText = getEl('tDireccion').value || '---';
-            getEl('outTPedido').innerText = getEl('tPedido').value || '---';
-            getEl('outTDomIda').innerText = formatCurrency(getEl('tDomIda').value);
-            getEl('outTDomVuelta').innerText = formatCurrency(getEl('tDomVuelta').value);
-            getEl('outTTotal').innerText = formatCurrency(getEl('tTotal').value);
-        }
-
+        /* ===================== DOWNLOAD TICKET ===================== */
         function downloadTicketImage() {
             const btn = document.getElementById('downloadTicketBtn');
-            const originalText = btn.innerHTML;
+            const orig = btn.innerHTML;
             btn.innerHTML = 'Generando Imagen...';
             btn.disabled = true;
 
-            const element = document.getElementById('ticketPreview');
-
-            html2canvas(element, {
+            html2canvas(document.getElementById('ticketPreview'), {
                 scale: 2,
                 backgroundColor: '#FDFCF8',
                 useCORS: true
@@ -655,40 +799,51 @@
                 link.download = `Ticket-Domicilio-${cliente}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-
-                btn.innerHTML = originalText;
+                btn.innerHTML = orig;
                 btn.disabled = false;
             }).catch(err => {
-                console.error('Error generando imagen:', err);
+                console.error(err);
                 alert('Hubo un error al generar la imagen.');
-                btn.innerHTML = originalText;
+                btn.innerHTML = orig;
                 btn.disabled = false;
             });
         }
 
+        /* ===================== WHATSAPP TICKET ===================== */
         function sendTicketWhatsApp() {
             let phone = document.getElementById('tTelefono').value.replace(/\D/g, '');
-
-            if (!phone) {
-                alert('Por favor, ingresa el número de teléfono del cliente.');
-                return;
-            }
-
-            if (phone.length === 10) {
-                phone = '57' + phone;
-            }
-
+            if (!phone) { alert('Por favor, ingresa el número de teléfono del cliente.'); return; }
+            if (phone.length === 10) phone = '57' + phone;
             const name = document.getElementById('tCliente').value.split(' ')[0] || 'Cliente';
             const total = document.getElementById('outTTotal').innerText;
-
             let text = `Hola ${name}, desde *Pacific Fajas* te confirmamos tu domicilio.\n\n`;
             text += `💰 *Total a pagar:* ${total}\n\n`;
             text += `¡Gracias por tu compra!\n_(Te enviaré la imagen del ticket a continuación)_`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+        }
 
-            const encodedText = encodeURIComponent(text);
-            const url = `https://wa.me/${phone}?text=${encodedText}`;
+        /* ===================== INIT ===================== */
+        function initApp() {
+            // Fecha de hoy
+            document.getElementById('date').value = todayValue();
+            document.getElementById('tFecha').value = todayValue();
 
-            window.open(url, '_blank');
+            // Número de factura: último guardado + 1
+            const next = nextInvoiceNumber();
+            document.getElementById('invoiceNumber').value = next;
+            saveLastInvoiceNumber();
+
+            // Iniciar vacío
+            items = [];
+            renderItemsForm();
+            updateInvoice();
+            updateTicket();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
         }
     </script>
 </body>
