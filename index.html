@@ -7,844 +7,1053 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-
     <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #C5A861; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #0B3A28; }
-
-        .table-row-dashed { border-bottom: 1px dashed #C5A861; }
-
-        body { font-family: 'Montserrat', sans-serif; }
-        .font-serif { font-family: 'Playfair Display', serif; }
-        .font-script { font-family: 'Dancing Script', cursive; }
-
-        .tab-btn { transition: all 0.2s ease; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        .ticket-dash {
-            background-image: repeating-linear-gradient(90deg, #C5A861 0 10px, transparent 10px 20px);
-            height: 2px;
-        }
-
-        /* Sello CANCELADO */
-        #stampCancelado {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-20deg);
-            border: 8px solid #cc0000;
-            color: #cc0000;
-            font-family: 'Playfair Display', serif;
-            font-size: 72px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            padding: 10px 24px;
-            border-radius: 8px;
-            opacity: 0.45;
-            pointer-events: none;
-            white-space: nowrap;
-            z-index: 100;
-            text-transform: uppercase;
-            display: none;
-        }
-
-        /* Toggle switch style */
-        .toggle-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .toggle-input { display: none; }
-        .toggle-track {
-            width: 44px; height: 24px;
-            background: #d1d5db;
-            border-radius: 9999px;
-            position: relative;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-        .toggle-thumb {
-            width: 18px; height: 18px;
-            background: white;
-            border-radius: 9999px;
-            position: absolute;
-            top: 3px; left: 3px;
-            transition: left 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        .toggle-input:checked + .toggle-track { background: #0B3A28; }
-        .toggle-input:checked + .toggle-track .toggle-thumb { left: 23px; }
-
-        input[type=checkbox].dom-check { accent-color: #0B3A28; width:16px; height:16px; cursor:pointer; }
+        ::-webkit-scrollbar{width:8px;height:8px}
+        ::-webkit-scrollbar-track{background:#f1f1f1}
+        ::-webkit-scrollbar-thumb{background:#C5A861;border-radius:4px}
+        ::-webkit-scrollbar-thumb:hover{background:#0B3A28}
+        .table-row-dashed{border-bottom:1px dashed #C5A861}
+        body{font-family:'Montserrat',sans-serif}
+        .font-serif{font-family:'Playfair Display',serif}
+        .font-script{font-family:'Dancing Script',cursive}
+        .tab-btn{transition:all 0.2s ease}
+        .tab-panel{display:none}
+        .tab-panel.active{display:block}
+        .ticket-dash{background-image:repeating-linear-gradient(90deg,#C5A861 0 10px,transparent 10px 20px);height:2px}
+        #stampCancelado{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);border:8px solid #cc0000;color:#cc0000;font-family:'Playfair Display',serif;font-size:72px;font-weight:700;letter-spacing:.12em;padding:10px 24px;border-radius:8px;opacity:.45;pointer-events:none;white-space:nowrap;z-index:100;text-transform:uppercase;display:none}
+        .toggle-label{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+        .toggle-input{display:none}
+        .toggle-track{width:44px;height:24px;background:#d1d5db;border-radius:9999px;position:relative;transition:background .2s;flex-shrink:0}
+        .toggle-thumb{width:18px;height:18px;background:white;border-radius:9999px;position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+        .toggle-input:checked+.toggle-track{background:#0B3A28}
+        .toggle-input:checked+.toggle-track .toggle-thumb{left:23px}
+        input[type=checkbox].dom-check{accent-color:#0B3A28;width:16px;height:16px;cursor:pointer}
+        /* Calculadora */
+        #calcSearchResults{position:absolute;top:100%;left:0;right:0;z-index:200;background:white;border:1px solid #C5A861;border-top:none;border-radius:0 0 8px 8px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+        #calcSearchResults .result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0ece3;transition:background .15s}
+        #calcSearchResults .result-item:hover{background:#f0f7f4}
+        #calcSearchResults .result-item:last-child{border-bottom:none}
+        .calc-card{background:white;border-radius:14px;border:1px solid #e5e7eb;padding:18px;transition:box-shadow .2s}
+        .calc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+        .stat-box{border-radius:10px;padding:14px 18px;text-align:center}
+        .commission-btn{padding:10px 22px;border-radius:8px;font-weight:700;font-size:15px;border:2px solid #0B3A28;cursor:pointer;transition:all .2s}
+        .commission-btn.active{background:#0B3A28;color:white}
+        .commission-btn:not(.active){background:white;color:#0B3A28}
+        /* Preview cotización */
+        #calcPreview{background:#F4F1EA;width:794px;min-width:794px;min-height:900px;position:relative;overflow:hidden}
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
 
-    <!-- BARRA DE PESTAÑAS -->
-    <div class="w-full bg-[#0B3A28] sticky top-0 z-50 shadow-md">
-        <div class="max-w-[1600px] mx-auto flex">
-            <button id="tabBtnFactura" onclick="switchTab('factura')" class="tab-btn flex-1 md:flex-none px-6 md:px-10 py-4 text-white font-bold font-serif tracking-wide text-sm md:text-base border-b-4 border-[#C5A861] bg-white/5">
-                FACTURA
-            </button>
-            <button id="tabBtnTicket" onclick="switchTab('ticket')" class="tab-btn flex-1 md:flex-none px-6 md:px-10 py-4 text-white/70 font-bold font-serif tracking-wide text-sm md:text-base border-b-4 border-transparent">
-                TICKET DE DOMICILIO
-            </button>
-        </div>
+<!-- BARRA DE PESTAÑAS -->
+<div class="w-full bg-[#0B3A28] sticky top-0 z-50 shadow-md">
+    <div class="max-w-[1600px] mx-auto flex overflow-x-auto">
+        <button id="tabBtnFactura" onclick="switchTab('factura')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-[#C5A861] bg-white/5">FACTURA</button>
+        <button id="tabBtnTicket" onclick="switchTab('ticket')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">TICKET DE DOMICILIO</button>
+        <button id="tabBtnCalc" onclick="switchTab('calc')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">CALCULADORA DE COMISIONES</button>
+        <button id="tabBtnMayor" onclick="switchTab('mayor')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">CALCULADORA MAYORISTA</button>
     </div>
+</div>
 
-    <!-- ============================================================= -->
-    <!-- PANEL: FACTURA                                                -->
-    <!-- ============================================================= -->
-    <div id="panelFactura" class="tab-panel active">
-        <div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
-
-            <!-- PANEL IZQUIERDO: FORMULARIO -->
-            <div class="w-full xl:w-5/12 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-fit xl:sticky xl:top-24 border-t-4 border-[#0B3A28]">
-                <div class="bg-[#0B3A28] p-5 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <svg class="h-6 w-6 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                        <h2 class="text-xl font-bold font-serif">Datos de la Factura</h2>
-                    </div>
-                </div>
-
-                <div class="p-6 space-y-6 overflow-y-auto" style="max-height: 80vh;">
-                    <!-- Datos Cliente -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Información del Cliente</h3>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
-                                <input type="text" id="clientName" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice(); syncToTicket()">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600 mb-1">Celular / WhatsApp</label>
-                                    <input type="text" id="clientPhone" placeholder="Número de celular" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice(); syncToTicket()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600 mb-1">Fecha</label>
-                                    <input type="date" id="date" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateInvoice()">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
-                                <input type="text" id="clientAddress" placeholder="Dirección del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice(); syncToTicket()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-1">N° Factura</label>
-                                <input type="text" id="invoiceNumber" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-gray-50 font-bold text-[#0B3A28]" oninput="updateInvoice(); saveLastInvoiceNumber()">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Productos -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Productos / Servicios</h3>
-                        <div id="itemsContainer" class="space-y-3"></div>
-                        <button onclick="addItem()" class="flex items-center gap-1 text-[#C5A861] font-bold hover:text-yellow-600 text-sm mt-2 transition">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            Añadir Fila
-                        </button>
-                    </div>
-
-                    <!-- Abono -->
-                    <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h3 class="text-md font-semibold text-[#0B3A28]">Pagos</h3>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Abona ($)</label>
-                            <input type="number" id="deposit" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateInvoice()">
-                        </div>
-                    </div>
-
-                    <!-- CANCELADO toggle -->
-                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center justify-between">
-                        <div>
-                            <p class="font-bold text-red-700 text-sm">Marcar como CANCELADO</p>
-                            <p class="text-xs text-red-500 mt-0.5">Agrega un sello a la imagen de la factura</p>
-                        </div>
-                        <label class="toggle-label">
-                            <input type="checkbox" id="canceladoCheck" class="toggle-input" onchange="toggleCancelado()">
-                            <div class="toggle-track">
-                                <div class="toggle-thumb"></div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Nueva Factura -->
-                    <button onclick="nuevaFactura()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-[#0B3A28] font-bold border-2 border-[#0B3A28] hover:bg-[#0B3A28] hover:text-white transition-all">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Nueva Factura (limpiar + consecutivo)
-                    </button>
-                </div>
-
-                <!-- Botones de Acción -->
-                <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
-                    <button onclick="downloadImage()" id="downloadBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        1. Descargar Factura (Imagen)
-                    </button>
-                    <button onclick="sendWhatsApp()" id="sendWhatsAppBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                        2. Enviar por WhatsApp
-                    </button>
-                    <p class="text-xs text-center text-gray-500 mt-1">📱 En el celular: la imagen queda lista para adjuntar al elegir WhatsApp. 💻 En computador: se descarga y se abre WhatsApp Web, solo arrástrala al chat.</p>
-                </div>
-            </div>
-
-            <!-- PANEL DERECHO: VISTA PREVIA FACTURA -->
-            <div class="w-full xl:w-7/12 flex flex-col items-center overflow-x-auto pb-8">
-                <div id="invoicePreview" class="bg-[#F4F1EA] shadow-2xl relative w-[794px] min-w-[794px] overflow-hidden" style="min-height: 1123px;">
-
-                    <!-- SELLO CANCELADO -->
-                    <div id="stampCancelado">CANCELADO</div>
-
-                    <div class="absolute top-0 left-0 w-64 h-64 bg-[#0B3A28] opacity-10 rounded-br-[100%] pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-80 h-80 bg-[#0B3A28] opacity-10 rounded-tl-[100%] pointer-events-none"></div>
-
-                    <div class="relative z-10 px-12 py-10 flex flex-col h-full min-h-[1123px]">
-
-                        <!-- HEADER -->
-                        <div class="flex justify-between items-start mb-8">
-                            <div class="bg-[#0B3A28] text-center py-6 px-10 w-[55%] relative">
-                                <h1 class="text-4xl font-serif text-white tracking-widest mb-2">PACIFIC FAJAS</h1>
-                                <div class="flex items-center justify-center gap-2 mb-2">
-                                    <div class="h-px bg-[#C5A861] w-12"></div>
-                                    <div class="w-2 h-2 border border-[#C5A861] rotate-45"></div>
-                                    <div class="h-px bg-[#C5A861] w-12"></div>
-                                </div>
-                                <p class="text-[#C5A861] text-xs tracking-[0.2em] uppercase">Fajas y Ropa Interior</p>
-                            </div>
-                            <div class="w-[40%] text-right pt-4">
-                                <h2 class="text-3xl font-serif text-[#0B3A28] tracking-widest mb-1">FACTURA</h2>
-                                <div class="flex items-center justify-end gap-2 mb-4">
-                                    <div class="h-px bg-[#C5A861] w-full max-w-[100px]"></div>
-                                    <div class="w-2 h-2 border border-[#C5A861] rotate-45"></div>
-                                    <div class="h-px bg-[#C5A861] w-full max-w-[100px]"></div>
-                                </div>
-                                <div class="text-2xl font-bold text-[#0B3A28] mb-4">Nº <span id="outInvoiceNumber"></span></div>
-                                <div class="text-sm text-[#0B3A28]">
-                                    <p class="mb-1">FECHA:</p>
-                                    <p id="outDate" class="uppercase"></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- CAJA CLIENTE -->
-                        <div class="border border-[#C5A861] rounded-2xl p-5 mb-8 bg-[#F4F1EA] relative z-10 mx-2 shadow-sm">
-                            <div class="grid grid-cols-1 gap-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div>
-                                    <div class="flex gap-2 items-center w-full">
-                                        <span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide">Cliente:</span>
-                                        <span id="outClientName" class="text-gray-800 text-lg"></span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                                    </div>
-                                    <div class="flex gap-2 items-center w-full">
-                                        <span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide">Celular:</span>
-                                        <span id="outClientPhone" class="text-gray-800 text-lg"></span>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-4">
-                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white mt-0.5">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
-                                    </div>
-                                    <div class="flex gap-2 items-start w-full">
-                                        <span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide mt-1">Dirección:</span>
-                                        <span id="outClientAddress" class="text-gray-800 text-lg flex-1"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- TABLA -->
-                        <div class="border border-[#C5A861] rounded-xl overflow-hidden mb-8 bg-[#FDFCF8] shadow-sm mx-2">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-[#0B3A28] text-white">
-                                        <th class="py-3 px-4 font-semibold text-sm w-20 text-center border-r border-[#0B3A28]/50">CANT.</th>
-                                        <th class="py-3 px-4 font-semibold text-sm text-center border-r border-[#0B3A28]/50">DESCRIPCIÓN</th>
-                                        <th class="py-3 px-4 font-semibold text-sm w-32 text-center border-r border-[#0B3A28]/50">VALOR UNIT.</th>
-                                        <th class="py-3 px-4 font-semibold text-sm w-32 text-center">VALOR TOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="outItemsTable"></tbody>
-                            </table>
-                            <div class="h-24 bg-[#FDFCF8]"></div>
-                        </div>
-
-                        <!-- TOTALES -->
-                        <div class="flex justify-end mx-2 mb-10">
-                            <div class="w-64">
-                                <div class="flex border-b border-[#E5DFCD]">
-                                    <div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">SUBTOTAL</div>
-                                    <div id="outSubtotal" class="w-1/2 bg-white py-2 px-4 text-right text-gray-800"></div>
-                                </div>
-                                <div class="flex border-b border-[#E5DFCD]">
-                                    <div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">ABONA</div>
-                                    <div id="outDeposit" class="w-1/2 bg-white py-2 px-4 text-right text-gray-800"></div>
-                                </div>
-                                <div class="flex">
-                                    <div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">DEBE</div>
-                                    <div id="outDebe" class="w-1/2 bg-white py-2 px-4 text-right text-[#0B3A28] font-bold text-lg"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- NOTA Y DIBUJO -->
-                        <div class="mt-auto flex gap-6 mx-2">
-                            <div class="border border-[#C5A861] rounded-2xl p-4 bg-[#FDFCF8] flex-1 flex flex-col justify-center">
-                                <div class="flex gap-3 mb-2 items-center">
-                                    <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center text-white font-bold text-xl shrink-0">!</div>
-                                    <h3 class="font-bold text-[#0B3A28] tracking-wide">NOTA IMPORTANTE</h3>
-                                </div>
-                                <p class="text-[11px] text-gray-700 leading-relaxed text-justify mb-3 pr-2">
-                                    Los arreglos no tienen garantía porque son modificaciones sobre una prenda ya confeccionada y el resultado final puede variar según el uso, la horma y el estado de la faja o brasier. Sin embargo, realizamos cada ajuste con el mayor cuidado y calidad posible. Después de esta modificación, cualquier ajuste adicional tendrá costo.
-                                </p>
-                                <p class="font-script text-2xl text-center text-[#0B3A28] mt-2">Gracias por tu comprensión ❤️</p>
-                            </div>
-                            <div class="w-48 flex items-center justify-center">
-                                <svg width="120" height="150" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M25 20 C30 40, 35 60, 25 100 L75 100 C65 60, 70 40, 75 20 Z" stroke="#0B3A28" stroke-width="2" fill="#FDFCF8"/>
-                                    <path d="M25 20 L20 5 M75 20 L80 5" stroke="#0B3A28" stroke-width="2"/>
-                                    <line x1="28" y1="30" x2="72" y2="30" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
-                                    <line x1="30" y1="50" x2="70" y2="50" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
-                                    <line x1="30" y1="70" x2="70" y2="70" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
-                                    <line x1="28" y1="90" x2="72" y2="90" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
-                                    <line x1="45" y1="20" x2="45" y2="100" stroke="#0B3A28" stroke-width="1"/>
-                                    <line x1="55" y1="20" x2="55" y2="100" stroke="#0B3A28" stroke-width="1"/>
-                                    <circle cx="50" cy="30" r="1.5" fill="#0B3A28"/>
-                                    <circle cx="50" cy="45" r="1.5" fill="#0B3A28"/>
-                                    <circle cx="50" cy="60" r="1.5" fill="#0B3A28"/>
-                                    <circle cx="50" cy="75" r="1.5" fill="#0B3A28"/>
-                                    <circle cx="50" cy="90" r="1.5" fill="#0B3A28"/>
-                                </svg>
-                            </div>
-                        </div>
-
-                        <!-- Eslogan -->
-                        <div class="text-center mt-4 mb-4">
-                            <p class="font-script text-3xl text-[#0B3A28]">¡Tu comodidad es nuestra prioridad!</p>
-                        </div>
-
-                        <!-- BARRA INFERIOR -->
-                        <div class="bg-[#0B3A28] text-white py-3 px-6 rounded-full flex justify-center items-center gap-6 mx-8 text-sm">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                                <span>@pacificfajas</span>
-                            </div>
-                            <div class="w-px h-4 bg-[#C5A861]"></div>
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                                <span>317 233 5456</span>
-                            </div>
-                            <div class="w-px h-4 bg-[#C5A861]"></div>
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
-                                <span>Colombia</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ====================================================== -->
+<!-- PANEL FACTURA -->
+<!-- ====================================================== -->
+<div id="panelFactura" class="tab-panel active">
+<div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
+    <div class="w-full xl:w-5/12 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-fit xl:sticky xl:top-24 border-t-4 border-[#0B3A28]">
+        <div class="bg-[#0B3A28] p-5 text-white flex items-center gap-3">
+            <svg class="h-6 w-6 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <h2 class="text-xl font-bold font-serif">Datos de la Factura</h2>
         </div>
-    </div>
-
-    <!-- ============================================================= -->
-    <!-- PANEL: TICKET DE DOMICILIO                                    -->
-    <!-- ============================================================= -->
-    <div id="panelTicket" class="tab-panel">
-        <div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
-
-            <!-- PANEL IZQUIERDO: FORMULARIO -->
-            <div class="w-full xl:w-5/12 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-fit xl:sticky xl:top-24 border-t-4 border-[#0B3A28]">
-                <div class="bg-[#0B3A28] p-5 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <svg class="h-6 w-6 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l1.664-1.664a2 2 0 011.414-.586h11.844a2 2 0 011.414.586L21 7m-18 0v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7h18M8 11h8M8 15h4" /></svg>
-                        <h2 class="text-xl font-bold font-serif">Datos del Domicilio</h2>
-                    </div>
+        <div class="p-6 space-y-6 overflow-y-auto" style="max-height:80vh">
+            <div class="space-y-4">
+                <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Información del Cliente</h3>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
+                    <input type="text" id="clientName" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice();syncToTicket();syncToCalc()">
                 </div>
-
-                <div class="p-6 space-y-4 overflow-y-auto" style="max-height: 80vh;">
-
-                    <!-- Info copiada de factura -->
-                    <div class="bg-[#f0f7f4] border border-[#0B3A28]/20 rounded-lg p-3 flex items-start gap-2">
-                        <svg class="w-4 h-4 text-[#0B3A28] mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-                        <p class="text-xs text-[#0B3A28]">Los campos de nombre, teléfono y dirección se copian automáticamente desde la Factura. Puedes editarlos aquí si necesitas.</p>
-                    </div>
-
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Nombre del Cliente</label>
-                        <input type="text" id="tCliente" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Teléfono</label>
-                        <input type="text" id="tTelefono" placeholder="Número de contacto" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Celular / WhatsApp</label>
+                        <input type="text" id="clientPhone" placeholder="Número de celular" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice();syncToTicket();syncToCalc()">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Fecha</label>
-                        <input type="date" id="tFecha" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateTicket()">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
-                        <input type="text" id="tDireccion" placeholder="Dirección de entrega" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Productos / Pedido</label>
-                        <textarea id="tPedido" rows="3" placeholder="Detalle del pedido" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></textarea>
-                    </div>
-
-                    <!-- Domicilios con checkbox -->
-                    <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h3 class="text-sm font-semibold text-[#0B3A28]">Domicilios</h3>
-
-                        <!-- Ida -->
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" id="checkDomIda" class="dom-check" onchange="updateTicket()">
-                            <label for="checkDomIda" class="text-sm font-medium text-gray-700 w-32">Domicilio Ida</label>
-                            <input type="number" id="tDomIda" value="0" placeholder="$" class="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateTicket()">
-                        </div>
-
-                        <!-- Vuelta -->
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" id="checkDomVuelta" class="dom-check" onchange="updateTicket()">
-                            <label for="checkDomVuelta" class="text-sm font-medium text-gray-700 w-32">Domicilio Vuelta</label>
-                            <input type="number" id="tDomVuelta" value="0" placeholder="$" class="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateTicket()">
-                        </div>
-
-                        <p class="text-xs text-gray-500 mt-1">✅ Marca la casilla para incluir el domicilio en el total. El valor se ingresa manualmente.</p>
-                    </div>
-
-                    <!-- Total automático -->
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Total a pagar ($) <span class="text-[#0B3A28] font-bold">(se calcula automáticamente)</span></label>
-                        <input type="number" id="tTotal" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold text-lg text-[#0B3A28]" oninput="updateTicket()">
-                        <p class="text-xs text-gray-500 mt-1">Suma automática de los domicilios marcados. También puedes editarlo manualmente.</p>
+                        <input type="date" id="date" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateInvoice()">
                     </div>
                 </div>
-
-                <!-- Botones -->
-                <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
-                    <button onclick="downloadTicketImage()" id="downloadTicketBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        Descargar Ticket (Imagen)
-                    </button>
-                    <button onclick="sendTicketWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                        Enviar por WhatsApp
-                    </button>
-                    <p class="text-xs text-center text-gray-500 mt-1">Descarga primero la imagen para adjuntarla en el chat.</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
+                    <input type="text" id="clientAddress" placeholder="Dirección del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateInvoice();syncToTicket();syncToCalc()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">N° Factura</label>
+                    <input type="text" id="invoiceNumber" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-gray-50 font-bold text-[#0B3A28]" oninput="updateInvoice();saveLastInvoiceNumber()">
                 </div>
             </div>
+            <div class="space-y-4">
+                <h3 class="text-lg font-semibold border-b border-gray-200 pb-2 text-[#0B3A28]">Productos / Servicios</h3>
+                <div id="itemsContainer" class="space-y-3"></div>
+                <button onclick="addItem()" class="flex items-center gap-1 text-[#C5A861] font-bold hover:text-yellow-600 text-sm mt-2 transition">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Añadir Fila
+                </button>
+            </div>
+            <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="text-md font-semibold text-[#0B3A28]">Pagos</h3>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Abona ($)</label>
+                    <input type="number" id="deposit" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold" oninput="updateInvoice()">
+                </div>
+            </div>
+            <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex items-center justify-between">
+                <div>
+                    <p class="font-bold text-red-700 text-sm">Marcar como CANCELADO</p>
+                    <p class="text-xs text-red-500 mt-0.5">Agrega un sello a la imagen de la factura</p>
+                </div>
+                <label class="toggle-label">
+                    <input type="checkbox" id="canceladoCheck" class="toggle-input" onchange="toggleCancelado()">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+            </div>
+            <button onclick="nuevaFactura()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-[#0B3A28] font-bold border-2 border-[#0B3A28] hover:bg-[#0B3A28] hover:text-white transition-all">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Nueva Factura (limpiar + consecutivo)
+            </button>
+        </div>
+        <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
+            <button onclick="downloadImage()" id="downloadBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>1. Descargar Factura (Imagen)
+            </button>
+            <button onclick="sendWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>2. Enviar por WhatsApp
+            </button>
+            <p class="text-xs text-center text-gray-500 mt-1">📱 En el celular: la imagen queda lista para adjuntar. 💻 En computador: se descarga y abre WhatsApp Web.</p>
+        </div>
+    </div>
 
-            <!-- PANEL DERECHO: VISTA PREVIA TICKET -->
-            <div class="w-full xl:w-7/12 flex flex-col items-center pb-8">
-                <div id="ticketPreview" class="bg-[#FDFCF8] shadow-2xl relative w-[380px] min-w-[380px] p-7 border border-[#C5A861]/40">
-                    <div class="text-center mb-3">
-                        <h1 class="text-2xl font-serif text-[#0B3A28] tracking-widest">PACIFIC FAJAS</h1>
-                        <div class="flex items-center justify-center gap-2 my-1">
-                            <div class="h-px bg-[#C5A861] w-10"></div>
-                            <div class="w-1.5 h-1.5 border border-[#C5A861] rotate-45"></div>
-                            <div class="h-px bg-[#C5A861] w-10"></div>
-                        </div>
-                        <p class="text-[#C5A861] text-[10px] tracking-[0.2em] uppercase">Ticket de Domicilio</p>
+    <!-- PREVIEW FACTURA -->
+    <div class="w-full xl:w-7/12 flex flex-col items-center overflow-x-auto pb-8">
+        <div id="invoicePreview" class="bg-[#F4F1EA] shadow-2xl relative w-[794px] min-w-[794px] overflow-hidden" style="min-height:1123px">
+            <div id="stampCancelado">CANCELADO</div>
+            <div class="absolute top-0 left-0 w-64 h-64 bg-[#0B3A28] opacity-10 rounded-br-[100%] pointer-events-none"></div>
+            <div class="absolute bottom-0 right-0 w-80 h-80 bg-[#0B3A28] opacity-10 rounded-tl-[100%] pointer-events-none"></div>
+            <div class="relative z-10 px-12 py-10 flex flex-col h-full min-h-[1123px]">
+                <div class="flex justify-between items-start mb-8">
+                    <div class="bg-[#0B3A28] text-center py-6 px-10 w-[55%]">
+                        <h1 class="text-4xl font-serif text-white tracking-widest mb-2">PACIFIC FAJAS</h1>
+                        <div class="flex items-center justify-center gap-2 mb-2"><div class="h-px bg-[#C5A861] w-12"></div><div class="w-2 h-2 border border-[#C5A861] rotate-45"></div><div class="h-px bg-[#C5A861] w-12"></div></div>
+                        <p class="text-[#C5A861] text-xs tracking-[0.2em] uppercase">Fajas y Ropa Interior</p>
                     </div>
-
-                    <div class="ticket-dash my-3"></div>
-
-                    <div class="space-y-2 text-sm">
-                        <div class="flex gap-2">
-                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Cliente:</span>
-                            <span id="outTCliente" class="text-gray-800">---</span>
+                    <div class="w-[40%] text-right pt-4">
+                        <h2 class="text-3xl font-serif text-[#0B3A28] tracking-widest mb-1">FACTURA</h2>
+                        <div class="flex items-center justify-end gap-2 mb-4"><div class="h-px bg-[#C5A861] w-full max-w-[100px]"></div><div class="w-2 h-2 border border-[#C5A861] rotate-45"></div><div class="h-px bg-[#C5A861] w-full max-w-[100px]"></div></div>
+                        <div class="text-2xl font-bold text-[#0B3A28] mb-4">Nº <span id="outInvoiceNumber"></span></div>
+                        <div class="text-sm text-[#0B3A28]"><p class="mb-1">FECHA:</p><p id="outDate" class="uppercase"></p></div>
+                    </div>
+                </div>
+                <div class="border border-[#C5A861] rounded-2xl p-5 mb-8 bg-[#F4F1EA] relative z-10 mx-2 shadow-sm">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg></div>
+                            <div class="flex gap-2 items-center w-full"><span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide">Cliente:</span><span id="outClientName" class="text-gray-800 text-lg"></span></div>
                         </div>
-                        <div class="flex gap-2">
-                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Fecha:</span>
-                            <span id="outTFecha" class="text-gray-800">---</span>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div>
+                            <div class="flex gap-2 items-center w-full"><span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide">Celular:</span><span id="outClientPhone" class="text-gray-800 text-lg"></span></div>
                         </div>
-                        <div class="flex gap-2">
-                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Teléfono:</span>
-                            <span id="outTTelefono" class="text-gray-800">---</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Dirección:</span>
-                            <span id="outTDireccion" class="text-gray-800 flex-1">---</span>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center flex-shrink-0 text-white mt-0.5"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
+                            <div class="flex gap-2 items-start w-full"><span class="font-bold text-[#0B3A28] w-28 uppercase text-sm tracking-wide mt-1">Dirección:</span><span id="outClientAddress" class="text-gray-800 text-lg flex-1"></span></div>
                         </div>
                     </div>
-
-                    <div class="ticket-dash my-3"></div>
-
-                    <div>
-                        <p class="font-bold text-[#0B3A28] uppercase text-xs tracking-wide mb-1">Pedido:</p>
-                        <p id="outTPedido" class="text-sm text-gray-800 whitespace-pre-line">---</p>
+                </div>
+                <div class="border border-[#C5A861] rounded-xl overflow-hidden mb-8 bg-[#FDFCF8] shadow-sm mx-2">
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-[#0B3A28] text-white">
+                            <th class="py-3 px-4 font-semibold text-sm w-20 text-center border-r border-[#0B3A28]/50">CANT.</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-center border-r border-[#0B3A28]/50">DESCRIPCIÓN</th>
+                            <th class="py-3 px-4 font-semibold text-sm w-32 text-center border-r border-[#0B3A28]/50">VALOR UNIT.</th>
+                            <th class="py-3 px-4 font-semibold text-sm w-32 text-center">VALOR TOTAL</th>
+                        </tr></thead>
+                        <tbody id="outItemsTable"></tbody>
+                    </table>
+                    <div class="h-24 bg-[#FDFCF8]"></div>
+                </div>
+                <div class="flex justify-end mx-2 mb-10">
+                    <div class="w-64">
+                        <div class="flex border-b border-[#E5DFCD]"><div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">SUBTOTAL</div><div id="outSubtotal" class="w-1/2 bg-white py-2 px-4 text-right text-gray-800"></div></div>
+                        <div class="flex border-b border-[#E5DFCD]"><div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">ABONA</div><div id="outDeposit" class="w-1/2 bg-white py-2 px-4 text-right text-gray-800"></div></div>
+                        <div class="flex"><div class="w-1/2 bg-[#0B3A28] text-white py-2 px-4 font-bold text-sm tracking-wide">DEBE</div><div id="outDebe" class="w-1/2 bg-white py-2 px-4 text-right text-[#0B3A28] font-bold text-lg"></div></div>
                     </div>
-
-                    <div class="ticket-dash my-3"></div>
-
-                    <div class="space-y-1 text-sm" id="ticketDomSection">
-                        <div id="rowDomIda" class="flex justify-between" style="display:none!important">
-                            <span class="text-gray-700">Domicilio Ida</span>
-                            <span id="outTDomIda" class="text-gray-800">$0</span>
-                        </div>
-                        <div id="rowDomVuelta" class="flex justify-between" style="display:none!important">
-                            <span class="text-gray-700">Domicilio Vuelta</span>
-                            <span id="outTDomVuelta" class="text-gray-800">$0</span>
-                        </div>
+                </div>
+                <div class="mt-auto flex gap-6 mx-2">
+                    <div class="border border-[#C5A861] rounded-2xl p-4 bg-[#FDFCF8] flex-1 flex flex-col justify-center">
+                        <div class="flex gap-3 mb-2 items-center"><div class="w-8 h-8 rounded-full bg-[#0B3A28] flex items-center justify-center text-white font-bold text-xl shrink-0">!</div><h3 class="font-bold text-[#0B3A28] tracking-wide">NOTA IMPORTANTE</h3></div>
+                        <p class="text-[11px] text-gray-700 leading-relaxed text-justify mb-3 pr-2">Los arreglos no tienen garantía porque son modificaciones sobre una prenda ya confeccionada y el resultado final puede variar según el uso, la horma y el estado de la faja o brasier. Sin embargo, realizamos cada ajuste con el mayor cuidado y calidad posible. Después de esta modificación, cualquier ajuste adicional tendrá costo.</p>
+                        <p class="font-script text-2xl text-center text-[#0B3A28] mt-2">Gracias por tu comprensión ❤️</p>
                     </div>
-
-                    <div class="ticket-dash my-3"></div>
-
-                    <div class="flex justify-between items-center bg-[#0B3A28] text-white rounded-lg py-2 px-4 mb-3">
-                        <span class="font-bold text-sm tracking-wide">TOTAL</span>
-                        <span id="outTTotal" class="font-bold text-lg">$0</span>
+                    <div class="w-48 flex items-center justify-center">
+                        <svg width="120" height="150" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M25 20 C30 40, 35 60, 25 100 L75 100 C65 60, 70 40, 75 20 Z" stroke="#0B3A28" stroke-width="2" fill="#FDFCF8"/>
+                            <path d="M25 20 L20 5 M75 20 L80 5" stroke="#0B3A28" stroke-width="2"/>
+                            <line x1="28" y1="30" x2="72" y2="30" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/><line x1="30" y1="50" x2="70" y2="50" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/><line x1="30" y1="70" x2="70" y2="70" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/><line x1="28" y1="90" x2="72" y2="90" stroke="#C5A861" stroke-width="1" stroke-dasharray="2 2"/>
+                            <line x1="45" y1="20" x2="45" y2="100" stroke="#0B3A28" stroke-width="1"/><line x1="55" y1="20" x2="55" y2="100" stroke="#0B3A28" stroke-width="1"/>
+                            <circle cx="50" cy="30" r="1.5" fill="#0B3A28"/><circle cx="50" cy="45" r="1.5" fill="#0B3A28"/><circle cx="50" cy="60" r="1.5" fill="#0B3A28"/><circle cx="50" cy="75" r="1.5" fill="#0B3A28"/><circle cx="50" cy="90" r="1.5" fill="#0B3A28"/>
+                        </svg>
                     </div>
-
-                    <p class="text-center font-script text-xl text-[#0B3A28] mt-2">¡Gracias por tu compra!</p>
-                    <p class="text-center text-[10px] text-gray-500 mt-1">@pacificfajas · 317 233 5456</p>
+                </div>
+                <div class="text-center mt-4 mb-4"><p class="font-script text-3xl text-[#0B3A28]">¡Tu comodidad es nuestra prioridad!</p></div>
+                <div class="bg-[#0B3A28] text-white py-3 px-6 rounded-full flex justify-center items-center gap-6 mx-8 text-sm">
+                    <div class="flex items-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg><span>@pacificfajas</span></div>
+                    <div class="w-px h-4 bg-[#C5A861]"></div>
+                    <div class="flex items-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span>317 233 5456</span></div>
+                    <div class="w-px h-4 bg-[#C5A861]"></div>
+                    <div class="flex items-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg><span>Colombia</span></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+</div>
 
-    <script>
-        /* ===================== UTILS ===================== */
-        const formatCurrency = (value) => '$' + new Intl.NumberFormat('es-CO').format(value || 0);
+<!-- ====================================================== -->
+<!-- PANEL TICKET (solo domicilio, SIN calculadora de comisiones) -->
+<!-- ====================================================== -->
+<div id="panelTicket" class="tab-panel">
+<div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
+    <div class="w-full xl:w-5/12 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-fit xl:sticky xl:top-24 border-t-4 border-[#0B3A28]">
+        <div class="bg-[#0B3A28] p-5 text-white flex items-center gap-3">
+            <svg class="h-6 w-6 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l1.664-1.664a2 2 0 011.414-.586h11.844a2 2 0 011.414.586L21 7m-18 0v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7h18M8 11h8M8 15h4"/></svg>
+            <h2 class="text-xl font-bold font-serif">Datos del Domicilio</h2>
+        </div>
+        <div class="p-6 space-y-4 overflow-y-auto" style="max-height:80vh">
+            <div class="bg-[#f0f7f4] border border-[#0B3A28]/20 rounded-lg p-3 flex items-start gap-2">
+                <svg class="w-4 h-4 text-[#0B3A28] mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                <p class="text-xs text-[#0B3A28]">Los campos de nombre, teléfono y dirección se copian automáticamente desde la Factura.</p>
+            </div>
+            <div><label class="block text-sm font-medium text-gray-600 mb-1">Nombre del Cliente</label><input type="text" id="tCliente" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></div>
+            <div><label class="block text-sm font-medium text-gray-600 mb-1">Teléfono</label><input type="text" id="tTelefono" placeholder="Número de contacto" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></div>
+            <div><label class="block text-sm font-medium text-gray-600 mb-1">Fecha</label><input type="date" id="tFecha" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" onchange="updateTicket()"></div>
+            <div><label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label><input type="text" id="tDireccion" placeholder="Dirección de entrega" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></div>
+            <div><label class="block text-sm font-medium text-gray-600 mb-1">Productos / Pedido</label><textarea id="tPedido" rows="3" placeholder="Detalle del pedido" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none" oninput="updateTicket()"></textarea></div>
+            <div class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-semibold text-[#0B3A28]">Domicilios</h3>
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="checkDomIda" class="dom-check" onchange="updateTicket()">
+                    <label for="checkDomIda" class="text-sm font-medium text-gray-700 w-32">Domicilio Ida</label>
+                    <input type="number" id="tDomIda" value="0" class="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateTicket()">
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="checkDomVuelta" class="dom-check" onchange="updateTicket()">
+                    <label for="checkDomVuelta" class="text-sm font-medium text-gray-700 w-32">Domicilio Vuelta</label>
+                    <input type="number" id="tDomVuelta" value="0" class="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateTicket()">
+                </div>
+                <p class="text-xs text-gray-500">✅ Marca la casilla para incluir el domicilio en el total.</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-medium text-gray-600 mb-1">Total a pagar ($) <span class="text-[#0B3A28] font-bold">(automático)</span></label>
+                <input type="number" id="tTotal" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none bg-white font-bold text-lg text-[#0B3A28]" oninput="updateTicket()">
+            </div>
+        </div>
+        <div class="bg-gray-50 p-4 border-t border-gray-200 flex flex-col gap-3">
+            <button onclick="downloadTicketImage()" id="downloadTicketBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Descargar Ticket (Imagen)
+            </button>
+            <button onclick="sendTicketWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>Enviar por WhatsApp
+            </button>
+        </div>
+    </div>
+    <!-- PREVIEW TICKET -->
+    <div class="w-full xl:w-7/12 flex flex-col items-center pb-8">
+        <div id="ticketPreview" class="bg-[#FDFCF8] shadow-2xl relative w-[380px] min-w-[380px] p-7 border border-[#C5A861]/40">
+            <div class="text-center mb-3">
+                <h1 class="text-2xl font-serif text-[#0B3A28] tracking-widest">PACIFIC FAJAS</h1>
+                <div class="flex items-center justify-center gap-2 my-1"><div class="h-px bg-[#C5A861] w-10"></div><div class="w-1.5 h-1.5 border border-[#C5A861] rotate-45"></div><div class="h-px bg-[#C5A861] w-10"></div></div>
+                <p class="text-[#C5A861] text-[10px] tracking-[0.2em] uppercase">Ticket de Domicilio</p>
+            </div>
+            <div class="ticket-dash my-3"></div>
+            <div class="space-y-2 text-sm">
+                <div class="flex gap-2"><span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Cliente:</span><span id="outTCliente" class="text-gray-800">---</span></div>
+                <div class="flex gap-2"><span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Fecha:</span><span id="outTFecha" class="text-gray-800">---</span></div>
+                <div class="flex gap-2"><span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Teléfono:</span><span id="outTTelefono" class="text-gray-800">---</span></div>
+                <div class="flex gap-2"><span class="font-bold text-[#0B3A28] w-24 uppercase text-xs tracking-wide shrink-0">Dirección:</span><span id="outTDireccion" class="text-gray-800 flex-1">---</span></div>
+            </div>
+            <div class="ticket-dash my-3"></div>
+            <div><p class="font-bold text-[#0B3A28] uppercase text-xs tracking-wide mb-1">Pedido:</p><p id="outTPedido" class="text-sm text-gray-800 whitespace-pre-line">---</p></div>
+            <div class="ticket-dash my-3"></div>
+            <div class="space-y-1 text-sm">
+                <div id="rowDomIda" class="flex justify-between" style="display:none!important"><span class="text-gray-700">Domicilio Ida</span><span id="outTDomIda" class="text-gray-800">$0</span></div>
+                <div id="rowDomVuelta" class="flex justify-between" style="display:none!important"><span class="text-gray-700">Domicilio Vuelta</span><span id="outTDomVuelta" class="text-gray-800">$0</span></div>
+            </div>
+            <div class="ticket-dash my-3"></div>
+            <div class="flex justify-between items-center bg-[#0B3A28] text-white rounded-lg py-2 px-4 mb-3">
+                <span class="font-bold text-sm tracking-wide">TOTAL</span><span id="outTTotal" class="font-bold text-lg">$0</span>
+            </div>
+            <p class="text-center font-script text-xl text-[#0B3A28] mt-2">¡Gracias por tu compra!</p>
+            <p class="text-center text-[10px] text-gray-500 mt-1">@pacificfajas · 317 233 5456</p>
+        </div>
+    </div>
+</div>
+</div>
 
-        const formatDateSpanish = (dateStr) => {
-            if (!dateStr) return '';
-            const months = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-            const parts = dateStr.split('-');
-            if (parts.length !== 3) return dateStr;
-            const [y, m, d] = parts.map(Number);
-            if (!y || !m || !d) return dateStr;
-            return `${d} DE ${months[m - 1]} DE ${y}`;
-        };
+<!-- ====================================================== -->
+<!-- PANEL CALCULADORA DE COMISIONES (con descarga y WhatsApp propios) -->
+<!-- ====================================================== -->
+<div id="panelCalc" class="tab-panel">
+<div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
 
-        const todayValue = () => {
-            const now = new Date();
-            return now.toISOString().split('T')[0];
-        };
+    <!-- FORMULARIO CALC -->
+    <div class="w-full xl:w-5/12 flex flex-col gap-5">
 
-        /* ===================== TABS ===================== */
-        function switchTab(tab) {
-            const pF = document.getElementById('panelFactura');
-            const pT = document.getElementById('panelTicket');
-            const bF = document.getElementById('tabBtnFactura');
-            const bT = document.getElementById('tabBtnTicket');
+        <!-- Datos cliente -->
+        <div class="bg-white rounded-xl shadow-lg border-t-4 border-[#0B3A28] overflow-hidden">
+            <div class="bg-[#0B3A28] p-4 text-white flex items-center gap-3">
+                <svg class="h-5 w-5 text-[#C5A861]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                <h2 class="font-bold font-serif">Datos del Cliente</h2>
+                <span class="ml-auto text-xs text-[#C5A861] bg-[#C5A861]/10 px-2 py-1 rounded">Auto desde Factura</span>
+            </div>
+            <div class="p-5 space-y-3">
+                <div><label class="block text-xs font-medium text-gray-500 mb-1">Nombre</label><input type="text" id="cCliente" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateCalcPreview()"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-medium text-gray-500 mb-1">Teléfono</label><input type="text" id="cTelefono" placeholder="Celular" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateCalcPreview()"></div>
+                    <div><label class="block text-xs font-medium text-gray-500 mb-1">Fecha</label><input type="date" id="cFecha" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" onchange="updateCalcPreview()"></div>
+                </div>
+                <div><label class="block text-xs font-medium text-gray-500 mb-1">Dirección</label><input type="text" id="cDireccion" placeholder="Dirección" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm" oninput="updateCalcPreview()"></div>
+            </div>
+        </div>
 
-            if (tab === 'factura') {
-                pF.classList.add('active'); pT.classList.remove('active');
-                bF.classList.add('border-[#C5A861]','text-white','bg-white/5');
-                bF.classList.remove('border-transparent','text-white/70');
-                bT.classList.remove('border-[#C5A861]','text-white','bg-white/5');
-                bT.classList.add('border-transparent','text-white/70');
-            } else {
-                pT.classList.add('active'); pF.classList.remove('active');
-                bT.classList.add('border-[#C5A861]','text-white','bg-white/5');
-                bT.classList.remove('border-transparent','text-white/70');
-                bF.classList.remove('border-[#C5A861]','text-white','bg-white/5');
-                bF.classList.add('border-transparent','text-white/70');
-            }
-        }
+        <!-- Buscador producto -->
+        <div class="bg-white rounded-xl shadow-lg border-t-4 border-[#C5A861]">
+            <div class="bg-[#C5A861] p-4 text-white flex items-center gap-3 rounded-t-xl">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
+                <h2 class="font-bold font-serif text-[#0B3A28]">Buscar Producto</h2>
+            </div>
+            <div class="p-5 space-y-4">
+                <!-- Search input -->
+                <div class="relative">
+                    <input type="text" id="calcSearchInput" placeholder="🔍  Escribe el nombre del producto..." class="w-full p-3 pr-10 border-2 border-[#C5A861] rounded-lg focus:ring-2 focus:ring-[#0B3A28] outline-none font-medium" oninput="calcSearch()" autocomplete="off">
+                    <button onclick="clearCalcSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+                    <div id="calcSearchResults"></div>
+                </div>
 
-        /* ===================== CONSECUTIVO ===================== */
-        function getLastInvoiceNumber() {
-            return localStorage.getItem('pf_lastInvoice') || '0';
-        }
-
-        function saveLastInvoiceNumber() {
-            const val = document.getElementById('invoiceNumber').value;
-            localStorage.setItem('pf_lastInvoice', val);
-        }
-
-        function nextInvoiceNumber() {
-            const last = getLastInvoiceNumber();
-            const num = parseInt(last, 10);
-            if (isNaN(num)) return '001';
-            return String(num + 1).padStart(3, '0');
-        }
-
-        /* ===================== FACTURA – ITEMS ===================== */
-        let items = [];
-
-        function renderItemsForm() {
-            const container = document.getElementById('itemsContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            items.forEach((item) => {
-                const div = document.createElement('div');
-                div.className = "flex gap-2 items-start bg-white p-3 rounded border border-gray-200 shadow-sm";
-                div.innerHTML = `
-                    <div class="flex-1 space-y-2">
-                        <div class="flex gap-2">
-                            <input type="number" value="${item.qty}" oninput="updateItem(${item.id}, 'qty', this.value)" placeholder="Cant." class="w-16 p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">
-                            <input type="number" value="${item.price}" oninput="updateItem(${item.id}, 'price', this.value)" placeholder="V. Unitario" class="w-28 p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">
+                <!-- Producto seleccionado -->
+                <div id="selectedProductCard" class="hidden bg-[#f0f7f4] border border-[#0B3A28]/20 rounded-xl p-4">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <p id="selProductName" class="font-bold text-[#0B3A28] text-sm leading-snug"></p>
+                            <p id="selProductDesc" class="text-xs text-gray-500 mt-0.5"></p>
                         </div>
-                        <textarea rows="2" oninput="updateItem(${item.id}, 'desc', this.value)" placeholder="Descripción" class="w-full p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">${item.desc}</textarea>
+                        <button onclick="clearProduct()" class="text-gray-400 hover:text-red-500 ml-2 text-lg leading-none">&times;</button>
                     </div>
-                    <button onclick="removeItem(${item.id})" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Eliminar Fila">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                `;
-                container.appendChild(div);
-            });
-        }
+                    <!-- Color y Talla -->
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Color</label>
+                            <select id="selColor" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm bg-white" onchange="updateCalcPreview()">
+                                <option value="">-- Seleccionar --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Talla</label>
+                            <select id="selTalla" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm bg-white" onchange="updateCalcPreview()">
+                                <option value="">-- Seleccionar --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Precio detal -->
+                    <div class="mt-3 p-3 bg-white rounded-lg border border-[#C5A861]/30">
+                        <p class="text-xs text-gray-500">Precio Detal (público)</p>
+                        <p id="selPrecioPublico" class="text-2xl font-bold text-[#0B3A28]"></p>
+                    </div>
+                </div>
 
-        function addItem() {
-            items.push({ id: Date.now(), qty: 1, desc: '', price: 0 });
-            renderItemsForm();
-            updateInvoice();
-        }
+                <!-- Comisión -->
+                <div id="commissionSection" class="hidden space-y-3">
+                    <label class="block text-sm font-semibold text-[#0B3A28]">% Comisión del Vendedor</label>
+                    <div class="flex gap-3">
+                        <button id="btn20" class="commission-btn active flex-1" onclick="setCommission(20)">20%</button>
+                        <button id="btn25" class="commission-btn flex-1" onclick="setCommission(25)">25%</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        function removeItem(id) {
-            items = items.filter(i => i.id !== id);
-            renderItemsForm();
-            updateInvoice();
-        }
+        <!-- Acciones: descargar imagen y WhatsApp, propias de esta pestaña -->
+        <div id="calcActions" class="hidden bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#0B3A28]">
+            <div class="p-4 flex flex-col gap-3">
+                <button onclick="downloadCalcImage()" id="downloadCalcBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Descargar Cotización (Imagen)
+                </button>
+                <button onclick="sendCalcWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>Enviar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
 
-        function updateItem(id, field, value) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item[field] = field === 'desc' ? value : Number(value);
-                updateInvoice();
-            }
-        }
+    <!-- PREVIEW CALCULADORA -->
+    <div class="w-full xl:w-7/12 flex flex-col items-center overflow-x-auto pb-8">
+        <div id="calcPreview" class="shadow-2xl relative overflow-hidden" style="width:794px;min-width:794px;min-height:900px;background:#F4F1EA">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-[#0B3A28] opacity-10 rounded-br-[100%] pointer-events-none"></div>
+            <div class="absolute bottom-0 right-0 w-80 h-80 bg-[#0B3A28] opacity-10 rounded-tl-[100%] pointer-events-none"></div>
+            <div class="relative z-10 px-12 py-10 flex flex-col min-h-[900px]">
 
-        /* ===================== NUEVA FACTURA ===================== */
-        function nuevaFactura() {
-            if (!confirm('¿Crear nueva factura? Los datos actuales se borrarán.')) return;
+                <!-- Header -->
+                <div class="flex justify-between items-start mb-8">
+                    <div class="bg-[#0B3A28] text-center py-6 px-10 w-[55%]">
+                        <h1 class="text-4xl font-serif text-white tracking-widest mb-2">PACIFIC FAJAS</h1>
+                        <div class="flex items-center justify-center gap-2 mb-2"><div class="h-px bg-[#C5A861] w-12"></div><div class="w-2 h-2 border border-[#C5A861] rotate-45"></div><div class="h-px bg-[#C5A861] w-12"></div></div>
+                        <p class="text-[#C5A861] text-xs tracking-[0.2em] uppercase">Fajas y Ropa Interior</p>
+                    </div>
+                    <div class="w-[40%] text-right pt-4">
+                        <h2 class="text-2xl font-serif text-[#0B3A28] tracking-widest mb-1">COTIZACIÓN</h2>
+                        <p class="text-xs text-[#C5A861] tracking-widest uppercase mb-3">Calculadora de Comisiones</p>
+                        <div class="flex items-center justify-end gap-2 mb-3"><div class="h-px bg-[#C5A861] w-20"></div><div class="w-2 h-2 border border-[#C5A861] rotate-45"></div></div>
+                        <div class="text-sm text-[#0B3A28]"><p id="cOutFecha" class="uppercase font-medium"></p></div>
+                    </div>
+                </div>
 
-            // Limpiar campos cliente
-            document.getElementById('clientName').value = '';
-            document.getElementById('clientPhone').value = '';
-            document.getElementById('clientAddress').value = '';
-            document.getElementById('deposit').value = '0';
-            document.getElementById('date').value = todayValue();
-            document.getElementById('canceladoCheck').checked = false;
-            toggleCancelado();
+                <!-- Cliente -->
+                <div class="border border-[#C5A861] rounded-2xl p-5 mb-6 bg-[#F4F1EA] shadow-sm mx-2">
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-full bg-[#0B3A28] flex items-center justify-center text-white shrink-0"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg></div><span class="font-bold text-[#0B3A28] w-24 text-xs uppercase tracking-wide">Cliente:</span><span id="cOutCliente" class="text-gray-800 font-medium">---</span></div>
+                        <div class="flex items-center gap-3"><div class="w-7 h-7 rounded-full bg-[#0B3A28] flex items-center justify-center text-white shrink-0"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div><span class="font-bold text-[#0B3A28] w-24 text-xs uppercase tracking-wide">Celular:</span><span id="cOutTelefono" class="text-gray-800 font-medium">---</span></div>
+                        <div class="flex items-start gap-3"><div class="w-7 h-7 rounded-full bg-[#0B3A28] flex items-center justify-center text-white shrink-0 mt-0.5"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg></div><span class="font-bold text-[#0B3A28] w-24 text-xs uppercase tracking-wide mt-1">Dirección:</span><span id="cOutDireccion" class="text-gray-800 font-medium flex-1">---</span></div>
+                    </div>
+                </div>
 
-            // Siguiente número consecutivo
-            const next = nextInvoiceNumber();
-            document.getElementById('invoiceNumber').value = next;
-            saveLastInvoiceNumber();
+                <!-- Producto seleccionado preview -->
+                <div id="calcProductArea" class="mx-2 mb-6">
+                    <div class="border border-[#C5A861] rounded-xl bg-[#FDFCF8] overflow-hidden shadow-sm">
+                        <div class="bg-[#0B3A28] px-5 py-3 flex items-center gap-2">
+                            <span class="text-white font-semibold text-sm tracking-wide">PRODUCTO SELECCIONADO</span>
+                        </div>
+                        <div class="p-5">
+                            <div id="calcNoProduct" class="text-center py-8 text-gray-400">
+                                <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
+                                <p class="text-sm">Busca y selecciona un producto para ver los cálculos</p>
+                            </div>
+                            <div id="calcProductInfo" class="hidden">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <p id="cpName" class="font-bold text-[#0B3A28] text-lg leading-snug"></p>
+                                        <p id="cpDesc" class="text-sm text-gray-500 mt-0.5"></p>
+                                        <div class="flex gap-3 mt-2">
+                                            <span id="cpColor" class="inline-block bg-[#0B3A28]/10 text-[#0B3A28] text-xs font-semibold px-3 py-1 rounded-full"></span>
+                                            <span id="cpTalla" class="inline-block bg-[#C5A861]/20 text-[#0B3A28] text-xs font-semibold px-3 py-1 rounded-full"></span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right shrink-0 ml-4">
+                                        <p class="text-xs text-gray-400 uppercase tracking-wide">Precio Público</p>
+                                        <p id="cpPrecioPublico" class="text-2xl font-bold text-[#0B3A28]"></p>
+                                    </div>
+                                </div>
 
-            // Vaciar filas
-            items = [];
-            renderItemsForm();
-            updateInvoice();
+                                <!-- Grid de cálculos -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="stat-box bg-blue-50 border border-blue-100">
+                                        <p class="text-xs text-blue-500 uppercase tracking-wide font-semibold mb-1">Comisión del Vendedor</p>
+                                        <p id="cpComisionPct" class="text-xs text-blue-400 mb-1"></p>
+                                        <p id="cpComision" class="text-xl font-bold text-blue-700"></p>
+                                    </div>
+                                    <div class="stat-box bg-[#0B3A28]/5 border border-[#0B3A28]/10">
+                                        <p class="text-xs text-[#0B3A28] uppercase tracking-wide font-semibold mb-1">Precio al Vendedor</p>
+                                        <p class="text-xs text-gray-400 mb-1">(precio público − comisión)</p>
+                                        <p id="cpPrecioVendedor" class="text-xl font-bold text-[#0B3A28]"></p>
+                                    </div>
+                                    <div class="stat-box bg-amber-50 border border-amber-100">
+                                        <p class="text-xs text-amber-600 uppercase tracking-wide font-semibold mb-1">Costo de Producción</p>
+                                        <p class="text-xs text-amber-400 mb-1">(20% del precio al vendedor)</p>
+                                        <p id="cpCostoProd" class="text-xl font-bold text-amber-700"></p>
+                                    </div>
+                                    <div class="stat-box bg-green-50 border border-green-100">
+                                        <p class="text-xs text-green-600 uppercase tracking-wide font-semibold mb-1">Utilidad Neta</p>
+                                        <p class="text-xs text-green-400 mb-1">(precio vendedor − costo prod.)</p>
+                                        <p id="cpUtilidad" class="text-2xl font-bold text-green-700"></p>
+                                    </div>
+                                </div>
 
-            // Limpiar sync al ticket
-            syncToTicket();
-        }
+                                <!-- Resumen visual -->
+                                <div class="mt-4 bg-[#0B3A28] rounded-xl p-4 text-white flex items-center justify-between">
+                                    <div class="text-center">
+                                        <p class="text-[10px] uppercase tracking-wider text-white/60">Precio Público</p>
+                                        <p id="sumPublico" class="font-bold text-lg text-[#C5A861]"></p>
+                                    </div>
+                                    <div class="text-[#C5A861] text-xl font-bold">−</div>
+                                    <div class="text-center">
+                                        <p class="text-[10px] uppercase tracking-wider text-white/60">Comisión</p>
+                                        <p id="sumComision" class="font-bold text-lg"></p>
+                                    </div>
+                                    <div class="text-[#C5A861] text-xl font-bold">−</div>
+                                    <div class="text-center">
+                                        <p class="text-[10px] uppercase tracking-wider text-white/60">Costo Prod.</p>
+                                        <p id="sumCosto" class="font-bold text-lg"></p>
+                                    </div>
+                                    <div class="text-[#C5A861] text-xl font-bold">=</div>
+                                    <div class="text-center bg-[#C5A861] rounded-lg px-4 py-2">
+                                        <p class="text-[10px] uppercase tracking-wider text-[#0B3A28] font-bold">Utilidad</p>
+                                        <p id="sumUtilidad" class="font-bold text-xl text-[#0B3A28]"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        /* ===================== SELLO CANCELADO ===================== */
-        function toggleCancelado() {
-            const stamp = document.getElementById('stampCancelado');
-            const checked = document.getElementById('canceladoCheck').checked;
-            stamp.style.display = checked ? 'block' : 'none';
-        }
+                <!-- Eslogan y footer -->
+                <div class="mt-auto">
+                    <div class="text-center mb-4"><p class="font-script text-3xl text-[#0B3A28]">¡Tu comodidad es nuestra prioridad!</p></div>
+                    <div class="bg-[#0B3A28] text-white py-3 px-6 rounded-full flex justify-center items-center gap-6 mx-8 text-sm">
+                        <div class="flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg><span>@pacificfajas</span></div>
+                        <div class="w-px h-4 bg-[#C5A861]"></div>
+                        <div class="flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span>317 233 5456</span></div>
+                        <div class="w-px h-4 bg-[#C5A861]"></div>
+                        <div class="flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg><span>Colombia</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 
-        /* ===================== SYNC TICKET ===================== */
-        function syncToTicket() {
-            const name = document.getElementById('clientName').value;
-            const phone = document.getElementById('clientPhone').value;
-            const address = document.getElementById('clientAddress').value;
-            document.getElementById('tCliente').value = name;
-            document.getElementById('tTelefono').value = phone;
-            document.getElementById('tDireccion').value = address;
-            updateTicket();
-        }
+<!-- ====================================================== -->
+<!-- PANEL CALCULADORA MAYORISTA -->
+<!-- ====================================================== -->
+<div id="panelMayor" class="tab-panel">
+<div class="flex flex-col xl:flex-row gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
 
-        /* ===================== UPDATE INVOICE ===================== */
-        function updateInvoice() {
-            const g = id => document.getElementById(id);
-            if (!g('outClientName')) return;
+    <!-- FORMULARIO MAYORISTA -->
+    <div class="w-full xl:w-5/12 flex flex-col gap-5">
 
-            g('outClientName').innerText = g('clientName').value;
-            g('outClientPhone').innerText = g('clientPhone').value;
-            g('outClientAddress').innerText = g('clientAddress').value;
-            g('outInvoiceNumber').innerText = g('invoiceNumber').value;
-            g('outDate').innerText = formatDateSpanish(g('date').value);
+        <div class="bg-white rounded-xl shadow-lg border-t-4 border-[#0B3A28] overflow-hidden">
+            <div class="bg-[#0B3A28] p-4 text-white flex items-center gap-3">
+                <svg class="h-5 w-5 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3.01V14m-3 3v-2m-2 2h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <h2 class="font-bold font-serif">Valor de la Venta Mayorista</h2>
+            </div>
+            <div class="p-5 space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Valor Venta Mayorista ($) <span class="text-[#0B3A28] font-bold">(editable)</span></label>
+                    <input type="number" id="mValorVenta" value="12000000" class="w-full p-3 border-2 border-[#0B3A28] rounded-lg focus:ring-2 focus:ring-[#C5A861] outline-none font-bold text-lg text-[#0B3A28]" oninput="updateMayorPreview()">
+                </div>
+                <p class="text-xs text-gray-500">El reparto (producción, nómina, publicidad y utilidad) se recalcula automáticamente según los porcentajes definidos.</p>
+            </div>
+        </div>
 
-            const table = g('outItemsTable');
-            table.innerHTML = '';
-            let subtotal = 0;
+        <div class="bg-white rounded-xl shadow-lg border-t-4 border-[#C5A861] overflow-hidden">
+            <div class="bg-[#C5A861] p-4 text-white flex items-center gap-3">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                <h2 class="font-bold font-serif text-[#0B3A28]">Enviar por WhatsApp</h2>
+            </div>
+            <div class="p-5 space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Número de celular</label>
+                    <input type="text" id="mTelefono" placeholder="Ej: 3172335456" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm">
+                </div>
+            </div>
+        </div>
 
-            items.forEach((item) => {
-                const totalItem = item.qty * item.price;
-                subtotal += totalItem;
-                table.innerHTML += `
-                    <tr class="table-row-dashed bg-white">
-                        <td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${item.qty}</td>
-                        <td class="py-3 px-4 border-r border-[#C5A861]/30 text-gray-700 whitespace-pre-line text-lg">${item.desc}</td>
-                        <td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${formatCurrency(item.price)}</td>
-                        <td class="py-3 px-4 text-center text-gray-800 text-lg">${formatCurrency(totalItem)}</td>
-                    </tr>
-                `;
-            });
+        <!-- Acciones -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#0B3A28]">
+            <div class="p-4 flex flex-col gap-3">
+                <button onclick="downloadMayorImage()" id="downloadMayorBtn" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Descargar Imagen
+                </button>
+                <button onclick="sendMayorWhatsApp()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-green-500 hover:bg-green-600">
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>Enviar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
 
-            const deposit = Number(g('deposit').value) || 0;
-            const debe = subtotal - deposit;
+    <!-- PREVIEW MAYORISTA -->
+    <div class="w-full xl:w-7/12 flex flex-col items-center overflow-x-auto pb-8">
+        <div id="mayorPreview" class="bg-[#F4F1EA] shadow-2xl relative w-[794px] min-w-[794px] overflow-hidden" style="min-height:1000px">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-[#0B3A28] opacity-10 rounded-br-[100%] pointer-events-none"></div>
+            <div class="absolute bottom-0 right-0 w-80 h-80 bg-[#0B3A28] opacity-10 rounded-tl-[100%] pointer-events-none"></div>
+            <div class="relative z-10 px-12 py-10 flex flex-col min-h-[1000px]">
 
-            g('outSubtotal').innerText = formatCurrency(subtotal);
-            g('outDeposit').innerText = formatCurrency(deposit);
-            g('outDebe').innerText = formatCurrency(debe < 0 ? 0 : debe);
-        }
+                <!-- Header -->
+                <div class="flex justify-between items-stretch mb-8 gap-3">
+                    <div class="bg-[#0B3A28] flex items-center justify-center py-5 px-8 w-1/2 rounded-lg">
+                        <h1 class="text-2xl font-serif text-white tracking-widest">PACIFIC FAJAS</h1>
+                    </div>
+                    <div class="bg-[#0B3A28] flex items-center justify-center py-5 px-8 w-1/2 rounded-lg">
+                        <h2 class="text-2xl font-serif text-[#C5A861] tracking-widest">PRECIO</h2>
+                    </div>
+                </div>
 
-        /* ===================== UPDATE TICKET ===================== */
-        function updateTicket() {
-            const g = id => document.getElementById(id);
-            if (!g('outTCliente')) return;
+                <div class="border border-[#C5A861] rounded-xl p-5 mb-8 bg-[#FDFCF8] shadow-sm flex justify-between items-center">
+                    <span class="font-bold text-[#0B3A28] uppercase tracking-wide">Valor Venta Mayorista</span>
+                    <span id="mOutValorVenta" class="text-2xl font-bold text-[#0B3A28]"></span>
+                </div>
 
-            g('outTCliente').innerText = g('tCliente').value || '---';
-            g('outTFecha').innerText = formatDateSpanish(g('tFecha').value) || '---';
-            g('outTTelefono').innerText = g('tTelefono').value || '---';
-            g('outTDireccion').innerText = g('tDireccion').value || '---';
-            g('outTPedido').innerText = g('tPedido').value || '---';
+                <!-- Tabla concepto / % / valor -->
+                <div class="border border-[#C5A861] rounded-xl overflow-hidden mb-2 bg-[#FDFCF8] shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-[#0B3A28] text-white">
+                            <th class="py-3 px-4 font-semibold text-sm border-r border-[#0B3A28]/50">CONCEPTO</th>
+                            <th class="py-3 px-4 font-semibold text-sm w-24 text-center border-r border-[#0B3A28]/50">%</th>
+                            <th class="py-3 px-4 font-semibold text-sm w-40 text-center">VALOR</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="table-row-dashed bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Costo de producción</td><td class="py-3 px-4 text-center text-gray-700">25%</td><td id="mCostoProd" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                            <tr class="table-row-dashed bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Nómina total</td><td class="py-3 px-4 text-center text-gray-700">40%</td><td id="mNominaTotal" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                            <tr class="table-row-dashed bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Publicidad</td><td class="py-3 px-4 text-center text-gray-700">10%</td><td id="mPublicidad" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                            <tr class="bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Utilidad</td><td class="py-3 px-4 text-center text-gray-700">25%</td><td id="mUtilidad" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-center bg-[#0B3A28] text-white rounded-lg py-2 px-4 mb-8">
+                    <span class="font-bold tracking-wide mr-4">TOTAL</span><span id="mOutTotal" class="font-bold"></span>
+                </div>
 
-            const idaChecked = g('checkDomIda').checked;
-            const vueltaChecked = g('checkDomVuelta').checked;
-            const idaVal = Number(g('tDomIda').value) || 0;
-            const vueltaVal = Number(g('tDomVuelta').value) || 0;
+                <!-- Reparto de la nómina -->
+                <div class="border border-[#C5A861] rounded-xl p-5 mb-2 bg-[#FDFCF8] shadow-sm flex justify-between items-center">
+                    <span class="font-bold text-[#0B3A28] uppercase tracking-wide">Reparto de la nómina</span>
+                    <span id="mOutNominaReparto" class="text-xl font-bold text-[#0B3A28]"></span>
+                </div>
 
-            // Mostrar / ocultar filas en preview
-            const rowIda = g('rowDomIda');
-            const rowVuelta = g('rowDomVuelta');
+                <div class="border border-[#C5A861] rounded-xl overflow-hidden mb-8 bg-[#FDFCF8] shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-[#0B3A28] text-white">
+                            <th class="py-3 px-4 font-semibold text-sm border-r border-[#0B3A28]/50">PERSONA</th>
+                            <th class="py-3 px-4 font-semibold text-sm w-32 text-center border-r border-[#0B3A28]/50">% DE LA NÓMINA</th>
+                            <th class="py-3 px-4 font-semibold text-sm w-40 text-center">VALOR</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="table-row-dashed bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Dueña + confeccionista</td><td class="py-3 px-4 text-center text-gray-700">50%</td><td id="mPersona1" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                            <tr class="table-row-dashed bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Auxiliar de taller</td><td class="py-3 px-4 text-center text-gray-700">20%</td><td id="mPersona2" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                            <tr class="bg-white"><td class="py-3 px-4 font-semibold text-gray-700">Community Manager / Ventas</td><td class="py-3 px-4 text-center text-gray-700">30%</td><td id="mPersona3" class="py-3 px-4 text-center text-gray-800 font-semibold"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
 
-            if (idaChecked) {
-                rowIda.style.setProperty('display', 'flex', 'important');
-                g('outTDomIda').innerText = formatCurrency(idaVal);
-            } else {
-                rowIda.style.setProperty('display', 'none', 'important');
-            }
+                <div class="border border-[#C5A861] rounded-xl p-5 bg-[#FDFCF8] shadow-sm mt-auto">
+                    <p class="font-bold text-[#0B3A28] mb-2">De esa utilidad puedes pagar:</p>
+                    <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                        <li>Arriendo</li>
+                        <li>Luz y agua</li>
+                        <li>Imprevistos</li>
+                        <li>Reinversión</li>
+                        <li>Ahorro</li>
+                        <li>Ganancia adicional para la empresa</li>
+                    </ul>
+                </div>
 
-            if (vueltaChecked) {
-                rowVuelta.style.setProperty('display', 'flex', 'important');
-                g('outTDomVuelta').innerText = formatCurrency(vueltaVal);
-            } else {
-                rowVuelta.style.setProperty('display', 'none', 'important');
-            }
+                <div class="text-center mt-8"><p class="font-script text-2xl text-[#0B3A28]">¡Tu comodidad es nuestra prioridad!</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 
-            // Suma automática
-            const autoTotal = (idaChecked ? idaVal : 0) + (vueltaChecked ? vueltaVal : 0);
-            // Si el usuario escribe manualmente en tTotal, respetarlo; pero si hay cambio en checks/values, actualizar
-            g('tTotal').value = autoTotal;
-            g('outTTotal').innerText = formatCurrency(autoTotal);
-        }
+<script>
+/* ===================== UTILS ===================== */
+const formatCurrency = v => '$' + new Intl.NumberFormat('es-CO').format(v||0);
+const formatDateSpanish = d => {
+    if(!d) return '';
+    const months=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+    const [y,m,dd] = d.split('-').map(Number);
+    if(!y||!m||!dd) return d;
+    return `${dd} DE ${months[m-1]} DE ${y}`;
+};
+const todayValue = () => new Date().toISOString().split('T')[0];
 
-        /* ===================== DOWNLOAD FACTURA ===================== */
-        function downloadImage() {
-            const btn = document.getElementById('downloadBtn');
-            const orig = btn.innerHTML;
-            btn.innerHTML = 'Generando Imagen...';
-            btn.disabled = true;
+/* ===================== TABS ===================== */
+function switchTab(tab){
+    const panelId = {factura:'Factura',ticket:'Ticket',calc:'Calc',mayor:'Mayor'};
+    Object.keys(panelId).forEach(t=>{
+        document.getElementById('panel'+panelId[t]).classList.remove('active');
+        const btn = document.getElementById('tabBtn'+panelId[t]);
+        if(btn){btn.classList.remove('border-[#C5A861]','text-white','bg-white/5');btn.classList.add('border-transparent','text-white/70');}
+    });
+    document.getElementById('panel'+panelId[tab]).classList.add('active');
+    const activeBtn = document.getElementById('tabBtn'+panelId[tab]);
+    if(activeBtn){activeBtn.classList.add('border-[#C5A861]','text-white','bg-white/5');activeBtn.classList.remove('border-transparent','text-white/70');}
+}
 
-            html2canvas(document.getElementById('invoicePreview'), {
-                scale: 2,
-                backgroundColor: '#F4F1EA',
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                const invNum = document.getElementById('invoiceNumber').value || '001';
-                link.download = `Factura-PacificFajas-${invNum}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                btn.innerHTML = orig;
-                btn.disabled = false;
-            }).catch(err => {
-                console.error(err);
-                alert('Hubo un error al generar la imagen.');
-                btn.innerHTML = orig;
-                btn.disabled = false;
-            });
-        }
+/* ===================== CONSECUTIVO ===================== */
+const getLastInvoiceNumber = () => localStorage.getItem('pf_lastInvoice')||'0';
+const saveLastInvoiceNumber = () => localStorage.setItem('pf_lastInvoice', document.getElementById('invoiceNumber').value);
+const nextInvoiceNumber = () => { const n=parseInt(getLastInvoiceNumber(),10); return String(isNaN(n)?1:n+1).padStart(3,'0'); };
 
-        /* ===================== WHATSAPP FACTURA ===================== */
-        function sendWhatsApp() {
-            let phone = document.getElementById('clientPhone').value.replace(/\D/g, '');
-            if (!phone) { alert('Por favor, ingresa el número de celular del cliente.'); return; }
-            if (phone.length === 10) phone = '57' + phone;
-            const name = document.getElementById('clientName').value.split(' ')[0] || 'Cliente';
-            const invNum = document.getElementById('invoiceNumber').value;
-            const debe = document.getElementById('outDebe').innerText;
-            let text = `Hola ${name}, desde *Pacific Fajas* te enviamos el resumen de tu Factura N° ${invNum}.\n\n`;
-            text += `💰 *Saldo Pendiente:* ${debe}\n\n`;
-            text += `¡Gracias por tu confianza!\n_(Te enviaré la imagen de la factura a continuación)_`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
-        }
+/* ===================== ITEMS FACTURA ===================== */
+let items = [];
+function renderItemsForm(){
+    const c = document.getElementById('itemsContainer'); if(!c) return; c.innerHTML='';
+    items.forEach(item=>{
+        const d=document.createElement('div'); d.className='flex gap-2 items-start bg-white p-3 rounded border border-gray-200 shadow-sm';
+        d.innerHTML=`<div class="flex-1 space-y-2"><div class="flex gap-2"><input type="number" value="${item.qty}" oninput="updateItem(${item.id},'qty',this.value)" placeholder="Cant." class="w-16 p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]"><input type="number" value="${item.price}" oninput="updateItem(${item.id},'price',this.value)" placeholder="V. Unitario" class="w-28 p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]"></div><textarea rows="2" oninput="updateItem(${item.id},'desc',this.value)" placeholder="Descripción" class="w-full p-2 text-sm border border-gray-300 rounded outline-none focus:border-[#C5A861]">${item.desc}</textarea></div><button onclick="removeItem(${item.id})" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>`;
+        c.appendChild(d);
+    });
+}
+function addItem(){ items.push({id:Date.now(),qty:1,desc:'',price:0}); renderItemsForm(); updateInvoice(); }
+function removeItem(id){ items=items.filter(i=>i.id!==id); renderItemsForm(); updateInvoice(); }
+function updateItem(id,field,value){ const item=items.find(i=>i.id===id); if(item){item[field]=field==='desc'?value:Number(value); updateInvoice();} }
 
-        /* ===================== DOWNLOAD TICKET ===================== */
-        function downloadTicketImage() {
-            const btn = document.getElementById('downloadTicketBtn');
-            const orig = btn.innerHTML;
-            btn.innerHTML = 'Generando Imagen...';
-            btn.disabled = true;
+/* ===================== NUEVA FACTURA ===================== */
+function nuevaFactura(){
+    if(!confirm('¿Crear nueva factura? Los datos actuales se borrarán.')) return;
+    ['clientName','clientPhone','clientAddress'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('deposit').value='0';
+    document.getElementById('date').value=todayValue();
+    document.getElementById('canceladoCheck').checked=false; toggleCancelado();
+    document.getElementById('invoiceNumber').value=nextInvoiceNumber(); saveLastInvoiceNumber();
+    items=[]; renderItemsForm(); updateInvoice(); syncToTicket(); syncToCalc();
+}
 
-            html2canvas(document.getElementById('ticketPreview'), {
-                scale: 2,
-                backgroundColor: '#FDFCF8',
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                const cliente = document.getElementById('tCliente').value.replace(/\s+/g, '') || 'Cliente';
-                link.download = `Ticket-Domicilio-${cliente}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                btn.innerHTML = orig;
-                btn.disabled = false;
-            }).catch(err => {
-                console.error(err);
-                alert('Hubo un error al generar la imagen.');
-                btn.innerHTML = orig;
-                btn.disabled = false;
-            });
-        }
+/* ===================== SELLO ===================== */
+function toggleCancelado(){ document.getElementById('stampCancelado').style.display=document.getElementById('canceladoCheck').checked?'block':'none'; }
 
-        /* ===================== WHATSAPP TICKET ===================== */
-        function sendTicketWhatsApp() {
-            let phone = document.getElementById('tTelefono').value.replace(/\D/g, '');
-            if (!phone) { alert('Por favor, ingresa el número de teléfono del cliente.'); return; }
-            if (phone.length === 10) phone = '57' + phone;
-            const name = document.getElementById('tCliente').value.split(' ')[0] || 'Cliente';
-            const total = document.getElementById('outTTotal').innerText;
-            let text = `Hola ${name}, desde *Pacific Fajas* te confirmamos tu domicilio.\n\n`;
-            text += `💰 *Total a pagar:* ${total}\n\n`;
-            text += `¡Gracias por tu compra!\n_(Te enviaré la imagen del ticket a continuación)_`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
-        }
+/* ===================== SYNC ===================== */
+function syncToTicket(){
+    document.getElementById('tCliente').value=document.getElementById('clientName').value;
+    document.getElementById('tTelefono').value=document.getElementById('clientPhone').value;
+    document.getElementById('tDireccion').value=document.getElementById('clientAddress').value;
+    updateTicket();
+}
+function syncToCalc(){
+    document.getElementById('cCliente').value=document.getElementById('clientName').value;
+    document.getElementById('cTelefono').value=document.getElementById('clientPhone').value;
+    document.getElementById('cDireccion').value=document.getElementById('clientAddress').value;
+    updateCalcPreview();
+}
 
-        /* ===================== INIT ===================== */
-        function initApp() {
-            // Fecha de hoy
-            document.getElementById('date').value = todayValue();
-            document.getElementById('tFecha').value = todayValue();
+/* ===================== UPDATE INVOICE ===================== */
+function updateInvoice(){
+    const g=id=>document.getElementById(id); if(!g('outClientName')) return;
+    g('outClientName').innerText=g('clientName').value;
+    g('outClientPhone').innerText=g('clientPhone').value;
+    g('outClientAddress').innerText=g('clientAddress').value;
+    g('outInvoiceNumber').innerText=g('invoiceNumber').value;
+    g('outDate').innerText=formatDateSpanish(g('date').value);
+    const table=g('outItemsTable'); table.innerHTML=''; let subtotal=0;
+    items.forEach(item=>{
+        const tot=item.qty*item.price; subtotal+=tot;
+        table.innerHTML+=`<tr class="table-row-dashed bg-white"><td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${item.qty}</td><td class="py-3 px-4 border-r border-[#C5A861]/30 text-gray-700 whitespace-pre-line text-lg">${item.desc}</td><td class="py-3 px-4 text-center border-r border-[#C5A861]/30 text-gray-800 text-lg">${formatCurrency(item.price)}</td><td class="py-3 px-4 text-center text-gray-800 text-lg">${formatCurrency(tot)}</td></tr>`;
+    });
+    const dep=Number(g('deposit').value)||0; const debe=subtotal-dep;
+    g('outSubtotal').innerText=formatCurrency(subtotal); g('outDeposit').innerText=formatCurrency(dep); g('outDebe').innerText=formatCurrency(debe<0?0:debe);
+}
 
-            // Número de factura: último guardado + 1
-            const next = nextInvoiceNumber();
-            document.getElementById('invoiceNumber').value = next;
-            saveLastInvoiceNumber();
+/* ===================== UPDATE TICKET ===================== */
+function updateTicket(){
+    const g=id=>document.getElementById(id); if(!g('outTCliente')) return;
+    g('outTCliente').innerText=g('tCliente').value||'---';
+    g('outTFecha').innerText=formatDateSpanish(g('tFecha').value)||'---';
+    g('outTTelefono').innerText=g('tTelefono').value||'---';
+    g('outTDireccion').innerText=g('tDireccion').value||'---';
+    g('outTPedido').innerText=g('tPedido').value||'---';
+    const idaOk=g('checkDomIda').checked, vueltaOk=g('checkDomVuelta').checked;
+    const idaV=Number(g('tDomIda').value)||0, vueltaV=Number(g('tDomVuelta').value)||0;
+    g('rowDomIda').style.setProperty('display',idaOk?'flex':'none','important');
+    if(idaOk) g('outTDomIda').innerText=formatCurrency(idaV);
+    g('rowDomVuelta').style.setProperty('display',vueltaOk?'flex':'none','important');
+    if(vueltaOk) g('outTDomVuelta').innerText=formatCurrency(vueltaV);
+    const total=(idaOk?idaV:0)+(vueltaOk?vueltaV:0);
+    g('tTotal').value=total; g('outTTotal').innerText=formatCurrency(total);
+}
 
-            // Iniciar vacío
-            items = [];
-            renderItemsForm();
-            updateInvoice();
-            updateTicket();
-        }
+/* ===================== DOWNLOADS / WA FACTURA ===================== */
+function downloadImage(){
+    const btn=document.getElementById('downloadBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
+    html2canvas(document.getElementById('invoicePreview'),{scale:2,backgroundColor:'#F4F1EA',useCORS:true}).then(c=>{
+        const l=document.createElement('a'); l.download=`Factura-PacificFajas-${document.getElementById('invoiceNumber').value||'001'}.png`; l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
+    }).catch(e=>{console.error(e);alert('Error al generar imagen.');btn.innerHTML=orig;btn.disabled=false;});
+}
+function sendWhatsApp(){
+    let p=document.getElementById('clientPhone').value.replace(/\D/g,''); if(!p){alert('Ingresa el número.');return;} if(p.length===10)p='57'+p;
+    const n=document.getElementById('clientName').value.split(' ')[0]||'Cliente';
+    let t=`Hola ${n}, desde *Pacific Fajas* te enviamos el resumen de tu Factura N° ${document.getElementById('invoiceNumber').value}.\n\n💰 *Saldo Pendiente:* ${document.getElementById('outDebe').innerText}\n\n¡Gracias por tu confianza!\n_(Te enviaré la imagen a continuación)_`;
+    window.open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`, '_blank');
+}
+function downloadTicketImage(){
+    const btn=document.getElementById('downloadTicketBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
+    html2canvas(document.getElementById('ticketPreview'),{scale:2,backgroundColor:'#FDFCF8',useCORS:true}).then(c=>{
+        const l=document.createElement('a'); l.download=`Ticket-${document.getElementById('tCliente').value.replace(/\s+/g,'')||'Cliente'}.png`; l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
+    }).catch(e=>{console.error(e);alert('Error.');btn.innerHTML=orig;btn.disabled=false;});
+}
+function sendTicketWhatsApp(){
+    let p=document.getElementById('tTelefono').value.replace(/\D/g,''); if(!p){alert('Ingresa el número.');return;} if(p.length===10)p='57'+p;
+    const n=document.getElementById('tCliente').value.split(' ')[0]||'Cliente';
+    let t=`Hola ${n}, desde *Pacific Fajas* te confirmamos tu domicilio.\n\n💰 *Total a pagar:* ${document.getElementById('outTTotal').innerText}\n\n¡Gracias por tu compra!\n_(Te enviaré la imagen del ticket a continuación)_`;
+    window.open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`, '_blank');
+}
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
-    </script>
+/* ===================== CATÁLOGO ===================== */
+const CATALOG = [
+  {id:1,name:'PACIFIC PERLA',desc:'Faja Reloj de arena con brassier media pierna',detal:237000,p20:189600,p25:177750,tallas:'S, M, L, XL, 2XL, S-M, ML, L-XL, XL-2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:2,name:'PACIFIC PERLA NEGRA',desc:'Faja reloj de Arena larga con Brassier',detal:247000,p20:197600,p25:185250,tallas:'S, M, L, XL, 2XL, S-M, ML, L-XL, XL-2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:3,name:'ESMERALDA',desc:'Faja Reloj de arena media pierna',detal:207000,p20:165600,p25:155250,tallas:'S, M, L, XL, 2XL, S-M, ML, L-XL, XL-2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:4,name:'PACIFIC CORAL',desc:'Faja Reloj de arena 2 EN 1 media pierna',detal:217000,p20:173600,p25:162750,tallas:'S, M, L, XL, 2XL, S-M, ML, L-XL, XL-2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:5,name:'PACIFIC MARFIL',desc:'Faja Reloj de arena Larga',detal:217000,p20:173600,p25:162750,tallas:'S, M, L, XL, 2XL, S-M, ML, L-XL, XL-2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:6,name:'PACIFIC NACÁR (CIERRE)',desc:'Faja moldeadora 3/4 CIERRE',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL, 3XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:7,name:'PACIFIC NACÁR (ABROCHADURA)',desc:'Faja moldeadora 3/4 ABROCHADURA',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:8,name:'PACIFIC ZAFIRO (CIERRE)',desc:'Faja moldeadora larga con brassier CIERRE',detal:207000,p20:165600,p25:155250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:9,name:'PACIFIC ZAFIRO (ABROCHADURA)',desc:'Faja moldeadora larga con brassier ABROCHADURA',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:10,name:'PACIFIC JADE (CIERRE)',desc:'Faja moldeadora larga Tira ancha CIERRE',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:11,name:'PACIFIC JADE (ABROCHADURA)',desc:'Faja moldeadora larga Tira ancha ABROCHADURA',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:12,name:'PACIFIC CRISTAL (CIERRE)',desc:'Faja moldeadora larga Tira removible CIERRE',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:13,name:'PACIFIC CRISTAL (ABROCHADURA)',desc:'Faja moldeadora larga Tira Removible ABROCHADURA',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:14,name:'PACIFIC DIAMANTE (ABROCHADURA)',desc:'Faja moldeadora larga con mangas ABROCHADURA',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:15,name:'PACIFIC DIAMANTE (CIERRE)',desc:'Faja moldeadora larga con mangas CIERRE',detal:207000,p20:165600,p25:155250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:16,name:'PACIFIC MAREA (ABROCHADURA)',desc:'Faja moldeadora larga con mangas y brassier ABROCHADURA',detal:247000,p20:197600,p25:185250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:17,name:'PACIFIC MAREA (CIERRE)',desc:'Faja moldeadora larga con mangas y brassier CIERRE',detal:257000,p20:205600,p25:192750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:18,name:'PACIFIC BRISA (CIERRE)',desc:'Faja moldeadora media pierna Tira ancha CIERRE',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:19,name:'PACIFIC BRISA (ABROCHADURA)',desc:'Faja moldeadora media pierna Tira ancha ABROCHADURA',detal:177000,p20:141600,p25:132750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:20,name:'PACIFIC BAHÍA (CIERRE)',desc:'Faja moldeadora strapless CIERRE',detal:167000,p20:133600,p25:125250,tallas:'S, M, L, XL, 2XL, 3XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:21,name:'PACIFIC BAHÍA (ABROCHADURA)',desc:'Faja moldeadora strapless ABROCHADURA',detal:157000,p20:125600,p25:117750,tallas:'S, M, L, XL, 2XL, 3XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:22,name:'PACIFIC OLEAJE (CIERRE)',desc:'Faja moldeadora Tira Removible CIERRE',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:23,name:'PACIFIC OLEAJE (ABROCHADURA)',desc:'Faja moldeadora Tira Removible ABROCHADURA',detal:177000,p20:141600,p25:132750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:24,name:'PACIFIC AURORA (CIERRE)',desc:'Faja moldeadora corta con brassier CIERRE',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:25,name:'PACIFIC AURORA (ABROCHADURA)',desc:'Faja moldeadora corta con brassier ABROCHADURA',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:26,name:'PACIFIC MAREJADA',desc:'Faja moldeadora corta con brassier y mangas ABROCHADURA',detal:247000,p20:197600,p25:185250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:27,name:'PACIFIC OCÉANO (CIERRE)',desc:'Faja moldeadora corta con brassier CIERRE',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:28,name:'PACIFIC OCÉANO (ABROCHADURA)',desc:'Faja moldeadora corta con brassier ABROCHADURA',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:29,name:'PACIFIC AMANECER (CIERRE)',desc:'Faja mold corta con brassier y manga corta CIERRE',detal:227000,p20:181600,p25:170250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:30,name:'PACIFIC AMANECER (ABROCHADURA)',desc:'Faja mold corta con brassier y manga corta ABROCHADURA',detal:217000,p20:173600,p25:162750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:31,name:'PACIFIC NUQUÍ',desc:'Faja moldeadora body chachetera CIERRE O ABROCHADURA',detal:157000,p20:125600,p25:117750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:32,name:'PACIFIC EMPERATRIZ',desc:'Panty Faja control abdomen',detal:137000,p20:109600,p25:102750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:33,name:'PACIFIC ESTRELLA',desc:'Faja mold cachetera con brassier',detal:177000,p20:141600,p25:132750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:34,name:'PACIFIC TESORO',desc:'Panty Faja Postquirurgico',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:35,name:'PACIFIC DELFINA',desc:'Faja moldeadora brasilera Estraple',detal:107000,p20:85600,p25:80250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:36,name:'PACIFIC JAGUAR (CIERRE)',desc:'Cinturilla moldeadora CIERRE',detal:107000,p20:85600,p25:80250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:37,name:'PACIFIC JAGUAR (ABROCHADURA)',desc:'Cinturilla moldeadora ABROCHADURA',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:38,name:'PACIFIC COLIBRÍ',desc:'Chaleco Reloj de Arena con Brassier',detal:167000,p20:133600,p25:125250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:39,name:'PACIFIC MARIPOSA',desc:'Chaleco Reloj de Arena 2 en 1 Con brassier',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:40,name:'PACIFIC PANTERA',desc:'Cinturilla látex',detal:87000,p20:69600,p25:65250,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:41,name:'PACIFIC TUCÁN',desc:'Chaleco moldeador con mangas',detal:167000,p20:133600,p25:125250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:42,name:'PACIFIC GARZA (CIERRE)',desc:'Chaleco moldeador Tira Removible CIERRE',detal:157000,p20:125600,p25:117750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:43,name:'PACIFIC GARZA (ABROCHADURA)',desc:'Chaleco moldeador Tira Removibl ABROCHADURA',detal:147000,p20:117600,p25:110250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:44,name:'PACIFIC QUETZAL',desc:'Cinturilla 2 en 1 Reloj de Arena',detal:167000,p20:133600,p25:125250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:45,name:'PACIFIC DANTA (CIERRE)',desc:'Chaleco Dama Corrector de postura CIERRE',detal:157000,p20:125600,p25:117750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:46,name:'PACIFIC DANTA (ABROCHADURA)',desc:'Chaleco Dama Corrector de postura ABROCHADURA',detal:147000,p20:117600,p25:110250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:47,name:'PACIFIC TIGRESA (CIERRE)',desc:'Chaleco moldeador Tira ancha CIERRE',detal:157000,p20:125600,p25:117750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:48,name:'PACIFIC TIGRESA (ABROCHADURA)',desc:'Chaleco moldeador Tira ancha ABROCHADURA',detal:147000,p20:117600,p25:110250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:49,name:'PACIFIC PUMA',desc:'Chaleco 2 EN 1 Reloj de Arena',detal:177000,p20:141600,p25:132750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:50,name:'PACIFIC ORQUÍDEA',desc:'Short levantacola cachetero',detal:67000,p20:53600,p25:50250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:51,name:'PACIFIC AZUCENA',desc:'Short levantacola control abdomen',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:52,name:'PACIFIC MAGNOLIA',desc:'Short levantacola con Abrochadura',detal:107000,p20:85600,p25:80250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:53,name:'PACIFIC CAMELIA',desc:'Short levantacola',detal:67000,p20:53600,p25:50250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:54,name:'PACIFIC ROSA',desc:'Short levantacola pescador',detal:107000,p20:85600,p25:80250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO, BLANCO'},
+  {id:55,name:'PACIFIC MORPHO',desc:'Faja postquirurgica larga con brassier',detal:207000,p20:165600,p25:155250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:56,name:'PACIFIC LIBÉLULA',desc:'Faja de descanso',detal:117000,p20:93600,p25:87750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:57,name:'PACIFIC CEIBA',desc:'Faja postquirurgica corta con brassier',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:58,name:'PACIFIC YARUMO',desc:'Faja postquirurgica larga con brassier y mangas',detal:247000,p20:197600,p25:185250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:59,name:'PACIFIC TIGRILLO',desc:'Faja postquirurgica larga',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:60,name:'PACIFIC GARCETA',desc:'Faja postquirurgica corta TIRA ANCHA',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:61,name:'PACIFIC HALCON',desc:'Faja postquirurgica corta TIRA REMOVIBLE',detal:187000,p20:149600,p25:140250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:62,name:'PACIFIC TANGARA',desc:'Faja postquirurgica larga - CIERRE ATRÁS',detal:197000,p20:157600,p25:147750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:63,name:'PACIFIC LUCIÉRNAGA',desc:'Faja postquirurgica larga CON MANGAS',detal:207000,p20:165600,p25:155250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA'},
+  {id:64,name:'REF 0110',desc:'Brassier postquirurgico Tira removible',detal:77000,p20:61600,p25:57750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:65,name:'REF 0106',desc:'Brassier postquirurgico',detal:77000,p20:61600,p25:57750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:66,name:'REF 01061',desc:'Brassier postquirurgico corrector de postura',detal:87000,p20:69600,p25:65250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:67,name:'REF 0107',desc:'Brassier postquirurgico Tira removible',detal:77000,p20:61600,p25:57750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:68,name:'REF 0108',desc:'Brassier postquirurgico CON MANGAS',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:69,name:'REF 2018',desc:'Cinturilla Deportiva hombre',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:70,name:'REF 2016',desc:'Cinturilla men CIERRE',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:71,name:'REF 2017 (CINTURILLA)',desc:'Cinturilla men ABROCHADURA',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:72,name:'PACIFIC OCELOTE (CIERRE)',desc:'Chaleco moldeador Hombre CIERRE',detal:137000,p20:109600,p25:102750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:73,name:'PACIFIC OCELOTE (ABROCHADURA)',desc:'Chaleco moldeador Hombre ABROCHADURA',detal:127000,p20:101600,p25:95250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:74,name:'REF 2017 (POSTQUIRURGICA MEN)',desc:'Faja postquirurgica men',detal:217000,p20:173600,p25:162750,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:75,name:'REF 2019',desc:'Fajon Abdominal',detal:87000,p20:69600,p25:65250,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:76,name:'REF 1252',desc:'Chaleco light men',detal:67000,p20:53600,p25:50250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:77,name:'REF 2011',desc:'Boxer levantacola',detal:67000,p20:53600,p25:50250,tallas:'S, M, L, XL, 2XL',colores:'BEIGE, COCOA, NEGRO'},
+  {id:78,name:'REF 1255',desc:'Chaleco en neopreno men',detal:77000,p20:61600,p25:57750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:79,name:'REF 1257',desc:'Chaleco dama en neopreno',detal:77000,p20:61600,p25:57750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:80,name:'REF 0726',desc:'Cinturilla Deportiva mujer',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:81,name:'REF 1253',desc:'Short deportivo neopreno',detal:77000,p20:61600,p25:57750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'},
+  {id:82,name:'REF 1254',desc:'Leggins con faja en neopreno',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'}
+];
+
+/* ===================== BÚSQUEDA ===================== */
+let selectedProduct = null;
+let commissionPct = 20;
+
+function calcSearch(){
+    const q = document.getElementById('calcSearchInput').value.trim().toLowerCase();
+    const box = document.getElementById('calcSearchResults');
+    if(!q){box.innerHTML='';return;}
+    const results = CATALOG.filter(p=>p.name.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)).slice(0,8);
+    if(!results.length){box.innerHTML='<div class="result-item text-gray-400 text-sm italic">Sin resultados</div>';return;}
+    box.innerHTML = results.map(p=>`<div class="result-item" onclick="selectProduct(${p.id})"><p class="font-semibold text-[#0B3A28] text-sm">${p.name}</p><p class="text-xs text-gray-400">${p.desc} · ${formatCurrency(p.detal)}</p></div>`).join('');
+}
+
+function selectProduct(id){
+    selectedProduct = CATALOG.find(p=>p.id===id);
+    document.getElementById('calcSearchResults').innerHTML='';
+    document.getElementById('calcSearchInput').value = selectedProduct.name;
+
+    // Mostrar card
+    document.getElementById('selectedProductCard').classList.remove('hidden');
+    document.getElementById('commissionSection').classList.remove('hidden');
+    document.getElementById('calcActions').classList.remove('hidden');
+    document.getElementById('selProductName').innerText = selectedProduct.name;
+    document.getElementById('selProductDesc').innerText = selectedProduct.desc;
+    document.getElementById('selPrecioPublico').innerText = formatCurrency(selectedProduct.detal);
+
+    // Colores
+    const colorSel = document.getElementById('selColor'); colorSel.innerHTML='<option value="">-- Color --</option>';
+    selectedProduct.colores.split(',').map(c=>c.trim()).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; colorSel.appendChild(o); });
+
+    // Tallas
+    const tallaSel = document.getElementById('selTalla'); tallaSel.innerHTML='<option value="">-- Talla --</option>';
+    selectedProduct.tallas.split(',').map(t=>t.trim()).forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; tallaSel.appendChild(o); });
+
+    updateCalcPreview();
+}
+
+function clearCalcSearch(){ document.getElementById('calcSearchInput').value=''; document.getElementById('calcSearchResults').innerHTML=''; }
+function clearProduct(){
+    selectedProduct=null;
+    document.getElementById('calcSearchInput').value='';
+    document.getElementById('calcSearchResults').innerHTML='';
+    document.getElementById('selectedProductCard').classList.add('hidden');
+    document.getElementById('commissionSection').classList.add('hidden');
+    document.getElementById('calcActions').classList.add('hidden');
+    document.getElementById('calcNoProduct').classList.remove('hidden');
+    document.getElementById('calcProductInfo').classList.add('hidden');
+}
+
+function setCommission(pct){
+    commissionPct=pct;
+    document.getElementById('btn20').classList.toggle('active',pct===20);
+    document.getElementById('btn25').classList.toggle('active',pct===25);
+    updateCalcPreview();
+}
+
+/* ===================== UPDATE CALC PREVIEW ===================== */
+function updateCalcPreview(){
+    const g=id=>document.getElementById(id);
+    g('cOutCliente').innerText=g('cCliente').value||'---';
+    g('cOutTelefono').innerText=g('cTelefono').value||'---';
+    g('cOutDireccion').innerText=g('cDireccion').value||'---';
+    g('cOutFecha').innerText=formatDateSpanish(g('cFecha').value)||'---';
+
+    if(!selectedProduct){ g('calcNoProduct').classList.remove('hidden'); g('calcProductInfo').classList.add('hidden'); return; }
+
+    g('calcNoProduct').classList.add('hidden');
+    g('calcProductInfo').classList.remove('hidden');
+
+    const detal = selectedProduct.detal;
+    const comision = Math.round(detal * commissionPct / 100);
+    const precioVendedor = detal - comision;
+    const costoProd = Math.round(precioVendedor * 0.20);
+    const utilidad = precioVendedor - costoProd;
+
+    const color = g('selColor').value || '---';
+    const talla = g('selTalla').value || '---';
+
+    g('cpName').innerText = selectedProduct.name;
+    g('cpDesc').innerText = selectedProduct.desc;
+    g('cpColor').innerText = '🎨 ' + color;
+    g('cpTalla').innerText = '📏 Talla ' + talla;
+    g('cpPrecioPublico').innerText = formatCurrency(detal);
+    g('cpComisionPct').innerText = `${commissionPct}% del precio público`;
+    g('cpComision').innerText = formatCurrency(comision);
+    g('cpPrecioVendedor').innerText = formatCurrency(precioVendedor);
+    g('cpCostoProd').innerText = formatCurrency(costoProd);
+    g('cpUtilidad').innerText = formatCurrency(utilidad);
+    g('sumPublico').innerText = formatCurrency(detal);
+    g('sumComision').innerText = formatCurrency(comision);
+    g('sumCosto').innerText = formatCurrency(costoProd);
+    g('sumUtilidad').innerText = formatCurrency(utilidad);
+}
+
+/* ===================== DOWNLOAD / WA CALC ===================== */
+function downloadCalcImage(){
+    const btn=document.getElementById('downloadCalcBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
+    html2canvas(document.getElementById('calcPreview'),{scale:2,backgroundColor:'#F4F1EA',useCORS:true}).then(c=>{
+        const l=document.createElement('a');
+        l.download=`Cotizacion-PacificFajas-${(selectedProduct?selectedProduct.name:'').replace(/\s+/g,'-')}.png`;
+        l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
+    }).catch(e=>{console.error(e);alert('Error al generar imagen.');btn.innerHTML=orig;btn.disabled=false;});
+}
+function sendCalcWhatsApp(){
+    let p=document.getElementById('cTelefono').value.replace(/\D/g,''); if(!p){alert('Ingresa el número del cliente.');return;} if(p.length===10)p='57'+p;
+    const n=document.getElementById('cCliente').value.split(' ')[0]||'Cliente';
+    if(!selectedProduct){alert('Selecciona un producto primero.');return;}
+    const comision=Math.round(selectedProduct.detal*commissionPct/100);
+    const pv=selectedProduct.detal-comision;
+    const cp=Math.round(pv*0.20);
+    const ut=pv-cp;
+    let t=`Hola ${n}! Desde *Pacific Fajas* te compartimos esta cotización:\n\n`;
+    t+=`🛍️ *Producto:* ${selectedProduct.name}\n`;
+    t+=`📋 ${selectedProduct.desc}\n\n`;
+    t+=`💵 *Precio Público:* ${formatCurrency(selectedProduct.detal)}\n`;
+    t+=`💸 *Comisión (${commissionPct}%):* ${formatCurrency(comision)}\n`;
+    t+=`🏷️ *Tu precio:* ${formatCurrency(pv)}\n`;
+    t+=`🏭 *Costo producción:* ${formatCurrency(cp)}\n`;
+    t+=`✅ *Utilidad neta:* ${formatCurrency(ut)}\n\n`;
+    t+=`_(Te enviaré la imagen de la cotización a continuación)_`;
+    window.open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`, '_blank');
+}
+
+/* ===================== CALCULADORA MAYORISTA ===================== */
+function updateMayorPreview(){
+    const g=id=>document.getElementById(id); if(!g('mOutValorVenta')) return;
+
+    const valorVenta = Number(g('mValorVenta').value)||0;
+
+    const costoProd   = Math.round(valorVenta*0.25);
+    const nominaTotal = Math.round(valorVenta*0.40);
+    const publicidad  = Math.round(valorVenta*0.10);
+    const utilidad    = valorVenta - costoProd - nominaTotal - publicidad; // resto, evita errores de redondeo
+
+    const persona1 = Math.round(nominaTotal*0.50);
+    const persona2 = Math.round(nominaTotal*0.20);
+    const persona3 = nominaTotal - persona1 - persona2; // resto, evita errores de redondeo
+
+    g('mOutValorVenta').innerText = formatCurrency(valorVenta);
+    g('mCostoProd').innerText     = formatCurrency(costoProd);
+    g('mNominaTotal').innerText   = formatCurrency(nominaTotal);
+    g('mPublicidad').innerText    = formatCurrency(publicidad);
+    g('mUtilidad').innerText      = formatCurrency(utilidad);
+    g('mOutTotal').innerText      = formatCurrency(valorVenta);
+
+    g('mOutNominaReparto').innerText = formatCurrency(nominaTotal);
+    g('mPersona1').innerText = formatCurrency(persona1);
+    g('mPersona2').innerText = formatCurrency(persona2);
+    g('mPersona3').innerText = formatCurrency(persona3);
+}
+
+function downloadMayorImage(){
+    const btn=document.getElementById('downloadMayorBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
+    html2canvas(document.getElementById('mayorPreview'),{scale:2,backgroundColor:'#F4F1EA',useCORS:true}).then(c=>{
+        const l=document.createElement('a');
+        l.download=`Mayorista-PacificFajas-${todayValue()}.png`;
+        l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
+    }).catch(e=>{console.error(e);alert('Error al generar imagen.');btn.innerHTML=orig;btn.disabled=false;});
+}
+
+function sendMayorWhatsApp(){
+    let p=document.getElementById('mTelefono').value.replace(/\D/g,''); if(!p){alert('Ingresa el número de celular.');return;} if(p.length===10)p='57'+p;
+    const valorVenta = Number(document.getElementById('mValorVenta').value)||0;
+    let t=`Hola! Desde *Pacific Fajas* te compartimos el resumen de la venta mayorista:\n\n`;
+    t+=`💰 *Valor Venta Mayorista:* ${formatCurrency(valorVenta)}\n`;
+    t+=`🏭 *Costo de producción (25%):* ${document.getElementById('mCostoProd').innerText}\n`;
+    t+=`👥 *Nómina total (40%):* ${document.getElementById('mNominaTotal').innerText}\n`;
+    t+=`📣 *Publicidad (10%):* ${document.getElementById('mPublicidad').innerText}\n`;
+    t+=`✅ *Utilidad (25%):* ${document.getElementById('mUtilidad').innerText}\n\n`;
+    t+=`_(Te enviaré la imagen a continuación)_`;
+    window.open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`, '_blank');
+}
+
+/* ===================== INIT ===================== */
+function initApp(){
+    document.getElementById('date').value=todayValue();
+    document.getElementById('tFecha').value=todayValue();
+    document.getElementById('cFecha').value=todayValue();
+    document.getElementById('invoiceNumber').value=nextInvoiceNumber(); saveLastInvoiceNumber();
+    items=[]; renderItemsForm(); updateInvoice(); updateTicket(); updateCalcPreview(); updateMayorPreview();
+
+    // Cerrar búsqueda al hacer click fuera
+    document.addEventListener('click',e=>{
+        if(!e.target.closest('#calcSearchInput')&&!e.target.closest('#calcSearchResults')) document.getElementById('calcSearchResults').innerHTML='';
+    });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initApp); else initApp();
+</script>
 </body>
 </html>
