@@ -33,6 +33,10 @@
         #calcSearchResults .result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0ece3;transition:background .15s}
         #calcSearchResults .result-item:hover{background:#f0f7f4}
         #calcSearchResults .result-item:last-child{border-bottom:none}
+        #regSearchResults{position:absolute;top:100%;left:0;right:0;z-index:200;background:white;border:1px solid #C5A861;border-top:none;border-radius:0 0 8px 8px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+        #regSearchResults .result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0ece3;transition:background .15s}
+        #regSearchResults .result-item:hover{background:#f0f7f4}
+        #regSearchResults .result-item:last-child{border-bottom:none}
         .calc-card{background:white;border-radius:14px;border:1px solid #e5e7eb;padding:18px;transition:box-shadow .2s}
         .calc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
         .stat-box{border-radius:10px;padding:14px 18px;text-align:center}
@@ -52,6 +56,7 @@
         <button id="tabBtnTicket" onclick="switchTab('ticket')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">TICKET DE DOMICILIO</button>
         <button id="tabBtnCalc" onclick="switchTab('calc')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">CALCULADORA DE COMISIONES</button>
         <button id="tabBtnMayor" onclick="switchTab('mayor')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">CALCULADORA MAYORISTA</button>
+        <button id="tabBtnRegistro" onclick="switchTab('registro')" class="tab-btn flex-shrink-0 px-5 md:px-8 py-4 text-white/70 font-bold font-serif tracking-wide text-xs md:text-sm border-b-4 border-transparent">REGISTRO DE VENTAS</button>
     </div>
 </div>
 
@@ -463,7 +468,7 @@
                                     </div>
                                     <div class="stat-box bg-amber-50 border border-amber-100">
                                         <p class="text-xs text-amber-600 uppercase tracking-wide font-semibold mb-1">Costo de Producción</p>
-                                        <p class="text-xs text-amber-400 mb-1">(20% del precio al vendedor)</p>
+                                        <p class="text-xs text-amber-400 mb-1">(25% del precio al vendedor)</p>
                                         <p id="cpCostoProd" class="text-xl font-bold text-amber-700"></p>
                                     </div>
                                     <div class="stat-box bg-green-50 border border-green-100">
@@ -648,6 +653,193 @@
 </div>
 </div>
 
+<!-- ====================================================== -->
+<!-- PANEL REGISTRO DE VENTAS / CAJA -->
+<!-- ====================================================== -->
+<div id="panelRegistro" class="tab-panel">
+<div class="flex flex-col gap-6 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
+
+    <!-- TOTALES DE CAJA -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="calc-card border-l-4 border-green-500">
+            <p class="text-xs text-green-600 uppercase tracking-wide font-semibold mb-1">Total Entradas</p>
+            <p id="regTotalEntradas" class="text-2xl font-bold text-green-700">$0</p>
+        </div>
+        <div class="calc-card border-l-4 border-red-500">
+            <p class="text-xs text-red-600 uppercase tracking-wide font-semibold mb-1">Total Salidas</p>
+            <p id="regTotalSalidas" class="text-2xl font-bold text-red-700">$0</p>
+        </div>
+        <div class="calc-card border-l-4 border-[#0B3A28] bg-[#0B3A28]">
+            <p class="text-xs text-[#C5A861] uppercase tracking-wide font-semibold mb-1">Total Caja (Entradas − Salidas)</p>
+            <p id="regTotalCaja" class="text-2xl font-bold text-white">$0</p>
+        </div>
+    </div>
+
+    <div class="flex flex-col xl:flex-row gap-6">
+        <!-- FORMULARIO REGISTRAR VENTA -->
+        <div class="w-full xl:w-1/2 bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#0B3A28]">
+            <div class="bg-[#0B3A28] p-4 text-white flex items-center gap-3">
+                <svg class="h-5 w-5 text-[#C5A861]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 7l-2.293-2.293a1 1 0 00-1.414 0L14 6m5 1l1.293 1.293a1 1 0 010 1.414L19 11M5 7L7.293 4.707a1 1 0 011.414 0L10 6M5 7L3.707 8.293a1 1 0 000 1.414L5 11m0-4v10a2 2 0 002 2h10a2 2 0 002-2V11"/></svg>
+                <h2 class="font-bold font-serif">Registrar Venta (Entrada)</h2>
+            </div>
+            <div class="p-5 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">N° Factura</label>
+                        <input type="text" id="regFactura" placeholder="N° Factura" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Fecha</label>
+                        <input type="date" id="regFecha" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Cliente</label>
+                    <input type="text" id="regCliente" placeholder="Nombre del cliente" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#C5A861] outline-none text-sm">
+                </div>
+
+                <!-- Buscador de producto/servicio -->
+                <div class="relative">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Producto / Servicio</label>
+                    <input type="text" id="regSearchInput" placeholder="🔍  Busca y selecciona para añadir una fila..." class="w-full p-3 pr-10 border-2 border-[#C5A861] rounded-lg focus:ring-2 focus:ring-[#0B3A28] outline-none font-medium text-sm" oninput="regSearch()" autocomplete="off">
+                    <button onclick="regClearSearch()" type="button" class="absolute right-3 top-1/2 translate-y-1 text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+                    <div id="regSearchResults"></div>
+                </div>
+
+                <!-- Filas de la factura (varios productos/servicios) -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead><tr class="bg-gray-50 text-gray-500 uppercase">
+                            <th class="py-2 px-2">Producto / Servicio</th>
+                            <th class="py-2 px-2 w-16 text-center">Cant.</th>
+                            <th class="py-2 px-2 w-24 text-center">Precio</th>
+                            <th class="py-2 px-2 text-right">Subtotal</th>
+                            <th class="py-2 px-2 text-center">—</th>
+                        </tr></thead>
+                        <tbody id="regStagedTable"></tbody>
+                    </table>
+                    <p id="regStagedEmpty" class="text-center text-gray-400 text-xs py-4">Busca arriba y selecciona para ir añadiendo filas a esta factura.</p>
+                </div>
+
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 flex justify-between items-center">
+                    <span class="text-xs font-semibold text-gray-500 uppercase">Valor Total de la Venta (suma de filas)</span>
+                    <span id="regStagedTotal" class="text-lg font-bold text-[#0B3A28]">$0</span>
+                </div>
+                <button onclick="addVenta()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Añadir Venta
+                </button>
+            </div>
+        </div>
+
+        <!-- FORMULARIO REGISTRAR SALIDA -->
+        <div class="w-full xl:w-1/2 bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-red-500">
+            <div class="bg-red-600 p-4 text-white flex items-center gap-3">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                <h2 class="font-bold font-serif">Registrar Salida (Gasto)</h2>
+            </div>
+            <div class="p-5 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Fecha</label>
+                        <input type="date" id="salFecha" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-300 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Valor ($)</label>
+                        <input type="number" id="salValor" value="0" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-300 outline-none text-sm font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Descripción del gasto</label>
+                    <input type="text" id="salDescripcion" placeholder="Ej: Compra de telas, arriendo, transporte..." class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-300 outline-none text-sm">
+                </div>
+                <button onclick="addSalida()" class="w-full flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-red-600 hover:bg-red-700 mt-2">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Añadir Salida
+                </button>
+
+                <div class="bg-red-50 border border-red-100 rounded-lg p-3 mt-4">
+                    <p class="text-xs text-red-500">💡 Registra aquí arriendo, servicios, insumos, transporte y cualquier otro gasto que salga de la caja.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA REGISTRO DE VENTAS -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#0B3A28]">
+        <div class="bg-[#0B3A28] p-4 text-white flex items-center justify-between">
+            <h2 class="font-bold font-serif">Registro de Ventas (Entradas)</h2>
+            <span id="regCountVentas" class="text-xs text-[#C5A861] bg-white/10 px-2 py-1 rounded">0 ventas</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead><tr class="bg-[#f0f7f4] text-[#0B3A28] uppercase text-xs">
+                    <th class="py-2 px-3">N° Factura</th>
+                    <th class="py-2 px-3">Fecha</th>
+                    <th class="py-2 px-3">Cliente</th>
+                    <th class="py-2 px-3">Producto / Servicio</th>
+                    <th class="py-2 px-3 text-center">Cant.</th>
+                    <th class="py-2 px-3 text-right">V. Unit.</th>
+                    <th class="py-2 px-3 text-right">V. Total</th>
+                    <th class="py-2 px-3 text-center">—</th>
+                </tr></thead>
+                <tbody id="regVentasTable"></tbody>
+            </table>
+            <p id="regVentasEmpty" class="text-center text-gray-400 text-sm py-6">Aún no hay ventas registradas.</p>
+        </div>
+    </div>
+
+    <!-- TABLA REGISTRO DE SALIDAS -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-red-500">
+        <div class="bg-red-600 p-4 text-white flex items-center justify-between">
+            <h2 class="font-bold font-serif">Registro de Salidas (Gastos)</h2>
+            <span id="regCountSalidas" class="text-xs text-white bg-white/10 px-2 py-1 rounded">0 salidas</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead><tr class="bg-red-50 text-red-700 uppercase text-xs">
+                    <th class="py-2 px-3">Fecha</th>
+                    <th class="py-2 px-3">Descripción</th>
+                    <th class="py-2 px-3 text-right">Valor</th>
+                    <th class="py-2 px-3 text-center">—</th>
+                </tr></thead>
+                <tbody id="regSalidasTable"></tbody>
+            </table>
+            <p id="regSalidasEmpty" class="text-center text-gray-400 text-sm py-6">Aún no hay salidas registradas.</p>
+        </div>
+    </div>
+
+    <!-- ACCIONES: DESCARGAR / CIERRE DE MES -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#C5A861]">
+        <div class="p-5 flex flex-col md:flex-row gap-3">
+            <button onclick="downloadRegistroCSV()" class="flex-1 flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#0B3A28] hover:bg-[#082a1d]">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Descargar Registro (Excel/CSV)
+            </button>
+            <button onclick="cierreMes()" class="flex-1 flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-white font-bold transition-all shadow-md bg-[#C5A861] hover:bg-yellow-600">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Cierre de Mes
+            </button>
+        </div>
+        <p class="text-xs text-center text-gray-500 pb-4 px-4">📥 "Descargar Registro" exporta el listado actual a un archivo .csv (abre en Excel). 🗂️ "Cierre de Mes" descarga el registro del periodo, lo guarda en el historial y reinicia los contadores para el nuevo mes.</p>
+    </div>
+
+    <!-- HISTORIAL DE CIERRES -->
+    <div id="regHistorialWrap" class="hidden bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-gray-300">
+        <div class="bg-gray-700 p-4 text-white">
+            <h2 class="font-bold font-serif">Historial de Cierres de Mes</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead><tr class="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <th class="py-2 px-3">Fecha de Cierre</th>
+                    <th class="py-2 px-3 text-right">Entradas</th>
+                    <th class="py-2 px-3 text-right">Salidas</th>
+                    <th class="py-2 px-3 text-right">Total Caja</th>
+                </tr></thead>
+                <tbody id="regHistorialTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+
 <script>
 /* ===================== UTILS ===================== */
 const formatCurrency = v => '$' + new Intl.NumberFormat('es-CO').format(v||0);
@@ -662,7 +854,7 @@ const todayValue = () => new Date().toISOString().split('T')[0];
 
 /* ===================== TABS ===================== */
 function switchTab(tab){
-    const panelId = {factura:'Factura',ticket:'Ticket',calc:'Calc',mayor:'Mayor'};
+    const panelId = {factura:'Factura',ticket:'Ticket',calc:'Calc',mayor:'Mayor',registro:'Registro'};
     Object.keys(panelId).forEach(t=>{
         document.getElementById('panel'+panelId[t]).classList.remove('active');
         const btn = document.getElementById('tabBtn'+panelId[t]);
@@ -867,6 +1059,38 @@ const CATALOG = [
   {id:82,name:'REF 1254',desc:'Leggins con faja en neopreno',detal:97000,p20:77600,p25:72750,tallas:'S, M, L, XL, 2XL',colores:'NEGRO'}
 ];
 
+/* ===================== SERVICIOS / ARREGLOS ===================== */
+const SERVICES = [
+  {id:1,name:'Reducción de fajas',price:20000},
+  {id:2,name:'Aumento de faja',price:25000},
+  {id:3,name:'Cambio en encaje siliconado',price:20000},
+  {id:4,name:'Cambio de abrochadora (3 posiciones)',price:25000},
+  {id:5,name:'Cambio de abrochadura (2 posiciones)',price:20000},
+  {id:6,name:'Cambio de cierre',price:20000},
+  {id:7,name:'Cambio de cierre perineal',price:15000},
+  {id:8,name:'Poner cierre perineal',price:15000},
+  {id:9,name:'Cambio de pieza de cola',price:35000},
+  {id:10,name:'Alargar la pierna',price:25000},
+  {id:11,name:'Cortar pierna y poner encaje',price:20000},
+  {id:12,name:'Cambio de varillas (c/u)',price:7000},
+  {id:13,name:'Cambio de broches individuales (c/u)',price:7000},
+  {id:14,name:'Poner broches en hombros',price:10000},
+  {id:15,name:'Quitar broches de hombros',price:10000},
+  {id:16,name:'Venta de tiras de brasier',price:7000},
+  {id:17,name:'Poner brasier a una faja',price:35000},
+  {id:18,name:'Quitar brasier de una faja',price:30000},
+  {id:19,name:'Cambiar de strapless a espalda alta',price:35000},
+  {id:20,name:'Cambiar de espalda alta a strapless',price:30000},
+  {id:21,name:'Cambio de posición de cierre',price:20000},
+  {id:22,name:'Otros arreglos',price:0}
+];
+
+/* Lista unificada para el buscador del Registro de Ventas (productos + servicios) */
+const REGISTRO_ITEMS = [
+  ...CATALOG.map(p=>({key:'prod-'+p.id, name:p.name, price:p.detal, type:'Producto'})),
+  ...SERVICES.map(s=>({key:'srv-'+s.id, name:s.name, price:s.price, type:'Servicio'}))
+];
+
 /* ===================== BÚSQUEDA ===================== */
 let selectedProduct = null;
 let commissionPct = 20;
@@ -939,7 +1163,7 @@ function updateCalcPreview(){
     const detal = selectedProduct.detal;
     const comision = Math.round(detal * commissionPct / 100);
     const precioVendedor = detal - comision;
-    const costoProd = Math.round(precioVendedor * 0.20);
+    const costoProd = Math.round(precioVendedor * 0.25);
     const utilidad = precioVendedor - costoProd;
 
     const color = g('selColor').value || '---';
@@ -1040,17 +1264,241 @@ function sendMayorWhatsApp(){
     window.open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`, '_blank');
 }
 
+/* ===================== REGISTRO DE VENTAS / CAJA ===================== */
+let ventasRegistro = [];
+let salidasRegistro = [];
+let cierresHistorial = [];
+let regStagedItems = []; // filas de la factura actual: {producto, cantidad, precio}
+
+function loadRegistro(){
+    try{ ventasRegistro = JSON.parse(localStorage.getItem('pf_ventasRegistro')||'[]'); }catch(e){ ventasRegistro=[]; }
+    try{ salidasRegistro = JSON.parse(localStorage.getItem('pf_salidasRegistro')||'[]'); }catch(e){ salidasRegistro=[]; }
+    try{ cierresHistorial = JSON.parse(localStorage.getItem('pf_cierresHistorial')||'[]'); }catch(e){ cierresHistorial=[]; }
+    // Migración de versión anterior (estructura plana sin "items") a la nueva estructura con varias filas
+    ventasRegistro = ventasRegistro.map(v=>{
+        if(!v.items){
+            return {id:v.id, factura:v.factura, fecha:v.fecha, cliente:v.cliente,
+                items:[{producto:v.producto, cantidad:v.cantidad, precio:v.precio, subtotal:v.total}], total:v.total};
+        }
+        return v;
+    });
+}
+function saveRegistro(){
+    localStorage.setItem('pf_ventasRegistro', JSON.stringify(ventasRegistro));
+    localStorage.setItem('pf_salidasRegistro', JSON.stringify(salidasRegistro));
+    localStorage.setItem('pf_cierresHistorial', JSON.stringify(cierresHistorial));
+}
+
+/* --- Buscador producto/servicio --- */
+function regSearch(){
+    const q = document.getElementById('regSearchInput').value.trim().toLowerCase();
+    const box = document.getElementById('regSearchResults');
+    if(!q){ box.innerHTML=''; return; }
+    const results = REGISTRO_ITEMS.filter(it=>it.name.toLowerCase().includes(q)).slice(0,10);
+    if(!results.length){ box.innerHTML='<div class="result-item text-gray-400 text-sm italic">Sin resultados</div>'; return; }
+    box.innerHTML = results.map(it=>`<div class="result-item" onclick="regSelectItem('${it.key}')"><p class="font-semibold text-[#0B3A28] text-sm">${it.name}</p><p class="text-xs text-gray-400">${it.type} · ${formatCurrency(it.price)}</p></div>`).join('');
+}
+// Al seleccionar un resultado, se añade como una fila más de la factura (permite varios productos/servicios)
+function regSelectItem(key){
+    const it = REGISTRO_ITEMS.find(x=>x.key===key);
+    if(!it) return;
+    regStagedItems.push({producto:it.name, cantidad:1, precio:it.price});
+    document.getElementById('regSearchInput').value='';
+    document.getElementById('regSearchResults').innerHTML='';
+    renderStagedRows();
+}
+function regClearSearch(){ document.getElementById('regSearchInput').value=''; document.getElementById('regSearchResults').innerHTML=''; }
+
+/* --- Filas (líneas) de la factura actual --- */
+function renderStagedRows(){
+    const tbody = document.getElementById('regStagedTable');
+    tbody.innerHTML = regStagedItems.map((row,idx)=>`<tr class="border-t border-gray-100">
+        <td class="py-2 px-2">${row.producto}</td>
+        <td class="py-2 px-2 text-center"><input type="number" min="1" value="${row.cantidad}" oninput="regUpdateRow(${idx},'cantidad',this.value)" class="w-14 p-1 border border-gray-300 rounded text-xs text-center"></td>
+        <td class="py-2 px-2 text-center"><input type="number" value="${row.precio}" oninput="regUpdateRow(${idx},'precio',this.value)" class="w-20 p-1 border border-gray-300 rounded text-xs text-center"></td>
+        <td id="regRowSubtotal_${idx}" class="py-2 px-2 text-right font-semibold">${formatCurrency(row.cantidad*row.precio)}</td>
+        <td class="py-2 px-2 text-center"><button onclick="regRemoveRow(${idx})" type="button" class="text-red-400 hover:text-red-600">&times;</button></td>
+    </tr>`).join('');
+    document.getElementById('regStagedEmpty').style.display = regStagedItems.length?'none':'block';
+    regUpdateStagedTotal();
+}
+function regUpdateRow(idx,field,value){
+    regStagedItems[idx][field] = Number(value)||0;
+    const row = regStagedItems[idx];
+    const cell = document.getElementById('regRowSubtotal_'+idx);
+    if(cell) cell.innerText = formatCurrency(row.cantidad*row.precio);
+    regUpdateStagedTotal();
+}
+function regUpdateStagedTotal(){
+    const total = regStagedItems.reduce((a,r)=>a+(r.cantidad*r.precio),0);
+    document.getElementById('regStagedTotal').innerText = formatCurrency(total);
+}
+function regRemoveRow(idx){
+    regStagedItems.splice(idx,1);
+    renderStagedRows();
+}
+
+/* --- Añadir venta / salida --- */
+function addVenta(){
+    if(!regStagedItems.length){ alert('Busca y añade al menos un producto o servicio a la factura.'); return; }
+    const items = regStagedItems.map(r=>({producto:r.producto, cantidad:r.cantidad, precio:r.precio, subtotal:r.cantidad*r.precio}));
+    const total = items.reduce((a,it)=>a+it.subtotal,0); // suma total de las filas
+    const venta = {
+        id: Date.now(),
+        factura: document.getElementById('regFactura').value||'---',
+        fecha: document.getElementById('regFecha').value||todayValue(),
+        cliente: document.getElementById('regCliente').value||'---',
+        items: items,
+        total: total
+    };
+    ventasRegistro.push(venta);
+    saveRegistro(); renderRegistro();
+
+    // limpiar formulario (mantiene fecha)
+    document.getElementById('regFactura').value='';
+    document.getElementById('regCliente').value='';
+    regStagedItems=[];
+    renderStagedRows();
+}
+function addSalida(){
+    const desc = document.getElementById('salDescripcion').value.trim();
+    const valor = Number(document.getElementById('salValor').value)||0;
+    if(!desc){ alert('Ingresa la descripción del gasto.'); return; }
+    if(valor<=0){ alert('Ingresa un valor mayor a 0.'); return; }
+    salidasRegistro.push({ id: Date.now(), fecha: document.getElementById('salFecha').value||todayValue(), descripcion: desc, valor: valor });
+    saveRegistro(); renderRegistro();
+    document.getElementById('salDescripcion').value='';
+    document.getElementById('salValor').value=0;
+}
+function removeVenta(id){
+    if(!confirm('¿Eliminar esta venta del registro?')) return;
+    ventasRegistro = ventasRegistro.filter(v=>v.id!==id);
+    saveRegistro(); renderRegistro();
+}
+function removeSalida(id){
+    if(!confirm('¿Eliminar esta salida del registro?')) return;
+    salidasRegistro = salidasRegistro.filter(s=>s.id!==id);
+    saveRegistro(); renderRegistro();
+}
+
+/* --- Render tablas y totales --- */
+function renderRegistro(){
+    const vTable = document.getElementById('regVentasTable');
+    if(!vTable) return;
+    vTable.innerHTML = ventasRegistro.map(v=>{
+        const cantidadTotal = v.items.reduce((a,it)=>a+it.cantidad,0);
+        const productoHTML = v.items.map(it=>`${it.producto} <span class="text-gray-400">(x${it.cantidad})</span>`).join('<br>');
+        const vUnitDisplay = v.items.length===1 ? formatCurrency(v.items[0].precio) : '<span class="text-gray-400 text-xs italic">Varios</span>';
+        return `<tr class="table-row-dashed bg-white">
+        <td class="py-2 px-3">${v.factura}</td>
+        <td class="py-2 px-3">${formatDateSpanish(v.fecha)}</td>
+        <td class="py-2 px-3">${v.cliente}</td>
+        <td class="py-2 px-3">${productoHTML}</td>
+        <td class="py-2 px-3 text-center">${cantidadTotal}</td>
+        <td class="py-2 px-3 text-right">${vUnitDisplay}</td>
+        <td class="py-2 px-3 text-right font-semibold">${formatCurrency(v.total)}</td>
+        <td class="py-2 px-3 text-center"><button onclick="removeVenta(${v.id})" class="text-red-400 hover:text-red-600">&times;</button></td>
+    </tr>`;
+    }).join('');
+    document.getElementById('regVentasEmpty').style.display = ventasRegistro.length?'none':'block';
+    document.getElementById('regCountVentas').innerText = ventasRegistro.length+' venta'+(ventasRegistro.length===1?'':'s');
+
+    const sTable = document.getElementById('regSalidasTable');
+    sTable.innerHTML = salidasRegistro.map(s=>`<tr class="table-row-dashed bg-white">
+        <td class="py-2 px-3">${formatDateSpanish(s.fecha)}</td>
+        <td class="py-2 px-3">${s.descripcion}</td>
+        <td class="py-2 px-3 text-right font-semibold">${formatCurrency(s.valor)}</td>
+        <td class="py-2 px-3 text-center"><button onclick="removeSalida(${s.id})" class="text-red-400 hover:text-red-600">&times;</button></td>
+    </tr>`).join('');
+    document.getElementById('regSalidasEmpty').style.display = salidasRegistro.length?'none':'block';
+    document.getElementById('regCountSalidas').innerText = salidasRegistro.length+' salida'+(salidasRegistro.length===1?'':'s');
+
+    updateRegistroTotals();
+    renderHistorialCierres();
+}
+function updateRegistroTotals(){
+    const entradas = ventasRegistro.reduce((a,v)=>a+v.total,0);
+    const salidas = salidasRegistro.reduce((a,s)=>a+s.valor,0);
+    document.getElementById('regTotalEntradas').innerText = formatCurrency(entradas);
+    document.getElementById('regTotalSalidas').innerText = formatCurrency(salidas);
+    document.getElementById('regTotalCaja').innerText = formatCurrency(entradas-salidas);
+    return {entradas,salidas,total:entradas-salidas};
+}
+function renderHistorialCierres(){
+    const wrap = document.getElementById('regHistorialWrap');
+    const tbody = document.getElementById('regHistorialTable');
+    if(!cierresHistorial.length){ wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    tbody.innerHTML = cierresHistorial.map(c=>`<tr class="table-row-dashed bg-white">
+        <td class="py-2 px-3">${c.fecha}</td>
+        <td class="py-2 px-3 text-right text-green-700 font-semibold">${formatCurrency(c.entradas)}</td>
+        <td class="py-2 px-3 text-right text-red-700 font-semibold">${formatCurrency(c.salidas)}</td>
+        <td class="py-2 px-3 text-right text-[#0B3A28] font-bold">${formatCurrency(c.total)}</td>
+    </tr>`).join('');
+}
+
+/* --- Exportar CSV --- */
+function buildRegistroCSV(){
+    let csv = 'REGISTRO DE VENTAS (ENTRADAS)\n';
+    csv += 'N° Factura,Fecha,Cliente,Producto/Servicio,Cantidad,Valor Unitario,Subtotal\n';
+    ventasRegistro.forEach(v=>{
+        v.items.forEach(it=>{
+            csv += `"${v.factura}","${formatDateSpanish(v.fecha)}","${v.cliente}","${it.producto.replace(/"/g,'""')}",${it.cantidad},${it.precio},${it.subtotal}\n`;
+        });
+    });
+    csv += '\nREGISTRO DE SALIDAS (GASTOS)\n';
+    csv += 'Fecha,Descripción,Valor\n';
+    salidasRegistro.forEach(s=>{
+        csv += `"${formatDateSpanish(s.fecha)}","${s.descripcion.replace(/"/g,'""')}",${s.valor}\n`;
+    });
+    const t = updateRegistroTotals();
+    csv += `\nTOTAL ENTRADAS,${t.entradas}\n`;
+    csv += `TOTAL SALIDAS,${t.salidas}\n`;
+    csv += `TOTAL CAJA,${t.total}\n`;
+    return csv;
+}
+function downloadRegistroCSV(){
+    const csv = buildRegistroCSV();
+    const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const l = document.createElement('a');
+    l.href = url; l.download = `Registro-Caja-PacificFajas-${todayValue()}.csv`;
+    document.body.appendChild(l); l.click(); document.body.removeChild(l);
+    URL.revokeObjectURL(url);
+}
+
+/* --- Cierre de mes --- */
+function cierreMes(){
+    if(!ventasRegistro.length && !salidasRegistro.length){ alert('No hay movimientos para cerrar este mes.'); return; }
+    if(!confirm('¿Cerrar el mes? Se descargará el registro actual, se guardará en el historial y se reiniciarán los contadores para el nuevo periodo.')) return;
+
+    const t = updateRegistroTotals();
+    downloadRegistroCSV();
+
+    cierresHistorial.unshift({ fecha: formatDateSpanish(todayValue()), entradas:t.entradas, salidas:t.salidas, total:t.total });
+
+    ventasRegistro = [];
+    salidasRegistro = [];
+    saveRegistro();
+    renderRegistro();
+    alert('Mes cerrado correctamente. El registro se reinició para el nuevo periodo.');
+}
+
 /* ===================== INIT ===================== */
 function initApp(){
     document.getElementById('date').value=todayValue();
     document.getElementById('tFecha').value=todayValue();
     document.getElementById('cFecha').value=todayValue();
+    document.getElementById('regFecha').value=todayValue();
+    document.getElementById('salFecha').value=todayValue();
     document.getElementById('invoiceNumber').value=nextInvoiceNumber(); saveLastInvoiceNumber();
     items=[]; renderItemsForm(); updateInvoice(); updateTicket(); updateCalcPreview(); updateMayorPreview();
+    loadRegistro(); renderRegistro();
 
     // Cerrar búsqueda al hacer click fuera
     document.addEventListener('click',e=>{
         if(!e.target.closest('#calcSearchInput')&&!e.target.closest('#calcSearchResults')) document.getElementById('calcSearchResults').innerHTML='';
+        if(!e.target.closest('#regSearchInput')&&!e.target.closest('#regSearchResults')) document.getElementById('regSearchResults').innerHTML='';
     });
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initApp); else initApp();
