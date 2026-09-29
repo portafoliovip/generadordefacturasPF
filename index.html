@@ -947,24 +947,137 @@ function updateTicket(){
     g('tTotal').value=total; g('outTTotal').innerText=formatCurrency(total);
 }
 
-/* ===================== DOWNLOADS / WA FACTURA ===================== */
-function downloadImage(){
-    const btn=document.getElementById('downloadBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
-    html2canvas(document.getElementById('invoicePreview'),{scale:2,backgroundColor:'#F4F1EA',useCORS:true}).then(c=>{
-        const l=document.createElement('a'); l.download=`Factura-PacificFajas-${document.getElementById('invoiceNumber').value||'001'}.png`; l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
-    }).catch(e=>{console.error(e);alert('Error al generar imagen.');btn.innerHTML=orig;btn.disabled=false;});
+/* ===================== GENERAR / DESCARGAR / COMPARTIR IMAGEN ===================== */
+const esMovil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+function mostrarImagenModal(url){
+    const old = document.getElementById('imgModal'); if(old) old.remove();
+    const m = document.createElement('div');
+    m.id = 'imgModal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;overflow:auto;padding:16px;text-align:center';
+    m.innerHTML = `
+        <p style="color:#fff;font-weight:600;margin-bottom:12px;font-size:14px">
+            📲 Mantén presionada la imagen y elige <b>"Guardar imagen"</b>
+        </p>
+        <img src="${url}" style="max-width:100%;height:auto;margin:0 auto;border-radius:8px;background:#fff">
+        <button onclick="document.getElementById('imgModal').remove()" style="display:block;margin:16px auto;padding:12px 32px;background:#C5A861;color:#0B3A28;font-weight:700;border-radius:8px">Cerrar</button>`;
+    document.body.appendChild(m);
 }
+
+async function generarImagen(elementId, bg, filename, btnId, shareText){
+    const btn = document.getElementById(btnId);
+    const orig = btn.innerHTML;
+    btn.innerHTML = 'Generando...'; btn.disabled = true;
+    try{
+        const el = document.getElementById(elementId);
+        const canvas = await html2canvas(el, {
+            scale: esMovil ? 1.5 : 2,
+            backgroundColor: bg,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: -window.scrollY
+        });
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        if(!blob) throw new Error('No se pudo crear la imagen');
+        const file = new File([blob], filename, {type:'image/png'});
+
+        // 1) Menú compartir del celular (WhatsApp, guardar en galería, etc.)
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+            try{
+                await navigator.share({files:[file], title:filename, text:shareText||''});
+                return;
+            }catch(e){
+                if(e.name === 'AbortError') return;
+            }
+        }
+
+        const url = URL.createObjectURL(blob);
+        if(esMovil){
+            // 2) Plan B en celular: mostrar la imagen para guardarla con pulsación larga
+            mostrarImagenModal(url);
+        }else{
+            // 3) Computador: descarga normal
+            const l = document.createElement('a');
+            l.href = url; l.download = filename;
+            document.body.appendChild(l); l.click(); document.body.removeChild(l);
+            setTimeout(()=>URL.revokeObjectURL(url), 5000);
+        }
+    }catch(e){
+        console.error(e);
+        alert('Error al generar la imagen. Si abriste el link desde Instagram o WhatsApp, ábrelo en Chrome o Safari.');
+    }finally{
+        btn.innerHTML = orig; btn.disabled = false;
+    }
+}
+
+/* ===================== FACTURA -> REGISTRO DE VENTAS (automático) ===================== */
+function mostrarAviso(msg){
+    const old=document.getElementById('toastAviso'); if(old) old.remove();
+    const t=document.createElement('div'); t.id='toastAviso';
+    t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0B3A28;color:#fff;padding:12px 20px;border-radius:9999px;font-size:14px;font-weight:600;z-index:10000;box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:90%;text-align:center';
+    t.innerText=msg; document.body.appendChild(t);
+    setTimeout(()=>t.remove(),3500);
+}
+function registrarFacturaEnRegistro(){
+    const validos = items.filter(i=>(Number(i.qty)||0)>0 && (Number(i.price)||0)>0);
+    if(!validos.length) return;
+    const numero = document.getElementById('invoiceNumber').value || '---';
+    const filas = validos.map(i=>({
+        producto: (i.desc||'').trim() || 'Sin descripción',
+        cantidad: Number(i.qty)||0,
+        precio: Number(i.price)||0,
+        subtotal: (Number(i.qty)||0)*(Number(i.price)||0)
+    }));
+    const total = filas.reduce((a,f)=>a+f.subtotal,0);
+    const datos = {
+        factura: numero,
+        fecha: document.getElementById('date').value || todayValue(),
+        cliente: document.getElementById('clientName').value || '---',
+        items: filas,
+        total: total,
+        auto: true
+    };
+    // Evita duplicados: si esta factura ya se registró, se actualiza en vez de repetirse
+    const existente = ventasRegistro.find(v=>v.auto && v.factura===numero);
+    if(existente){
+        Object.assign(existente, datos);
+        mostrarAviso('✅ Factura '+numero+' actualizada en el Registro de Ventas');
+    }else{
+        ventasRegistro.push(Object.assign({id:Date.now()}, datos));
+        mostrarAviso('✅ Factura '+numero+' añadida al Registro de Ventas');
+    }
+    saveRegistro(); renderRegistro();
+}
+
+function downloadImage(){
+    registrarFacturaEnRegistro();
+    generarImagen('invoicePreview','#F4F1EA',
+        `Factura-PacificFajas-${document.getElementById('invoiceNumber').value||'001'}.png`,
+        'downloadBtn','Factura Pacific Fajas');
+}
+function downloadTicketImage(){
+    generarImagen('ticketPreview','#FDFCF8',
+        `Ticket-${document.getElementById('tCliente').value.replace(/\s+/g,'')||'Cliente'}.png`,
+        'downloadTicketBtn','Ticket de domicilio Pacific Fajas');
+}
+function downloadCalcImage(){
+    generarImagen('calcPreview','#F4F1EA',
+        `Cotizacion-PacificFajas-${(selectedProduct?selectedProduct.name:'').replace(/\s+/g,'-')}.png`,
+        'downloadCalcBtn','Cotización Pacific Fajas');
+}
+function downloadMayorImage(){
+    generarImagen('mayorPreview','#F4F1EA',
+        `Mayorista-PacificFajas-${todayValue()}.png`,
+        'downloadMayorBtn','Venta mayorista Pacific Fajas');
+}
+
+/* ===================== DOWNLOADS / WA FACTURA ===================== */
 function sendWhatsApp(){
+    registrarFacturaEnRegistro();
     let p=document.getElementById('clientPhone').value.replace(/\D/g,''); if(!p){alert('Ingresa el número.');return;} if(p.length===10)p='57'+p;
     const n=document.getElementById('clientName').value.split(' ')[0]||'Cliente';
     let t=`Hola ${n}, desde *Pacific Fajas* te enviamos el resumen de tu Factura N° ${document.getElementById('invoiceNumber').value}.\n\n💰 *Saldo Pendiente:* ${document.getElementById('outDebe').innerText}\n\n¡Gracias por tu confianza!\n_(Te enviaré la imagen a continuación)_`;
     window.open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`, '_blank');
-}
-function downloadTicketImage(){
-    const btn=document.getElementById('downloadTicketBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
-    html2canvas(document.getElementById('ticketPreview'),{scale:2,backgroundColor:'#FDFCF8',useCORS:true}).then(c=>{
-        const l=document.createElement('a'); l.download=`Ticket-${document.getElementById('tCliente').value.replace(/\s+/g,'')||'Cliente'}.png`; l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
-    }).catch(e=>{console.error(e);alert('Error.');btn.innerHTML=orig;btn.disabled=false;});
 }
 function sendTicketWhatsApp(){
     let p=document.getElementById('tTelefono').value.replace(/\D/g,''); if(!p){alert('Ingresa el número.');return;} if(p.length===10)p='57'+p;
@@ -1187,21 +1300,13 @@ function updateCalcPreview(){
 }
 
 /* ===================== DOWNLOAD / WA CALC ===================== */
-function downloadCalcImage(){
-    const btn=document.getElementById('downloadCalcBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
-    html2canvas(document.getElementById('calcPreview'),{scale:2,backgroundColor:'#F4F1EA',useCORS:true}).then(c=>{
-        const l=document.createElement('a');
-        l.download=`Cotizacion-PacificFajas-${(selectedProduct?selectedProduct.name:'').replace(/\s+/g,'-')}.png`;
-        l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
-    }).catch(e=>{console.error(e);alert('Error al generar imagen.');btn.innerHTML=orig;btn.disabled=false;});
-}
 function sendCalcWhatsApp(){
     let p=document.getElementById('cTelefono').value.replace(/\D/g,''); if(!p){alert('Ingresa el número del cliente.');return;} if(p.length===10)p='57'+p;
     const n=document.getElementById('cCliente').value.split(' ')[0]||'Cliente';
     if(!selectedProduct){alert('Selecciona un producto primero.');return;}
     const comision=Math.round(selectedProduct.detal*commissionPct/100);
     const pv=selectedProduct.detal-comision;
-    const cp=Math.round(pv*0.20);
+    const cp=Math.round(pv*0.25);
     const ut=pv-cp;
     let t=`Hola ${n}! Desde *Pacific Fajas* te compartimos esta cotización:\n\n`;
     t+=`🛍️ *Producto:* ${selectedProduct.name}\n`;
@@ -1241,15 +1346,6 @@ function updateMayorPreview(){
     g('mPersona1').innerText = formatCurrency(persona1);
     g('mPersona2').innerText = formatCurrency(persona2);
     g('mPersona3').innerText = formatCurrency(persona3);
-}
-
-function downloadMayorImage(){
-    const btn=document.getElementById('downloadMayorBtn'); const orig=btn.innerHTML; btn.innerHTML='Generando...'; btn.disabled=true;
-    html2canvas(document.getElementById('mayorPreview'),{scale:2,backgroundColor:'#F4F1EA',useCORS:true}).then(c=>{
-        const l=document.createElement('a');
-        l.download=`Mayorista-PacificFajas-${todayValue()}.png`;
-        l.href=c.toDataURL('image/png'); l.click(); btn.innerHTML=orig; btn.disabled=false;
-    }).catch(e=>{console.error(e);alert('Error al generar imagen.');btn.innerHTML=orig;btn.disabled=false;});
 }
 
 function sendMayorWhatsApp(){
